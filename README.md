@@ -1,77 +1,109 @@
-# pocwatchdog
+### 安装
 
-[中文版](README_CN.md)
-
-pocwatchdog is a cross-platform Python task scheduler that supports scheduled task execution and email notifications.
-
-## Features
-
-- Easy to use
-- Cross-platform support (Windows, Linux, macOS)
-- Flexible task scheduling
-- Configurable email notifications (success and failure)
-- Automatic SMTP server selection
-- Detailed error reporting
-
-## Installation
-
-Install pocwatchdog using pip:
+使用 pip 安装 etools:
 
 ```bash
-pip install -U pocwatchdog
+pip install etools
 ```
 
-## Usage
 
-1. Import the pocwatchdog module:
+## Speed
+
+Speed 是一个测试网络、磁盘、内存、GPU性能的工具，可以测试网络速度、磁盘速度、内存速度、GPU性能。
+
+### 使用
 
 ```python
-import pocwatchdog
+from etools import Speed
+
+Speed.test_network_speed()
+Speed.test_disk_speed()
+Speed.test_memory_speed()
+Speed.test_gpu_performance()
+Speed.run_all_tests()
 ```
 
-2. Define your task:
+## ScreenShare
+
+ScreenShare 是一个屏幕共享工具，可以共享屏幕。
+
+### 使用
+
+```python
+from etools import screen_share
+
+screen_share(port=8900)
+```
+
+
+## pocwatch
+
+pocwatch 是一个跨平台的 Python 任务调度器，支持丰富的定时执行任务，甚至是嵌套，并通过邮件发送通知：包括代码的报错信息、文件、截图。
+
+![2134e47ae8ad5ff7d54792840dbe450](https://github.com/user-attachments/assets/37c6d6df-631a-430d-ae42-5ce4b565ff06)
+
+
+### 特性
+
+- 简单易用
+- 跨平台支持 (Windows, Linux, macOS)
+- 灵活的任务调度
+- 可配置的邮件通知 (成功和失败)
+- 自动 SMTP 服务器选择
+- 详细的错误报告
+
+
+### 使用
+
+1. 导入 pocwatchdog 模块:
+
+```python
+from etools import pocwatch
+```
+
+2. 定义您的任务:
 
 ```python
 def your_task():
-    print("Task is running...")
+    print("任务执行中...")
 ```
 
-3. Run the task scheduler:
+3. 运行任务调度器:
 
 ```python:path/to/main.py
-pocwatchdog.run(
+pocwatch(
     job=your_task, 
     schedule_time="08:00",
-    sender=None,  # Default is not to send
-    password=None,  # Default is not to send
-    recipients=[],  # Default is not to send
-    smtp_server='smtp.exmail.qq.com',  # Default is auto-select
-    smtp_port=465,  # Default is auto-select
-    smtp_ssl=True,  # Default is auto-select
-    success_subject="success",  # Default value
-    success_body="success",  # Default value
-    failure_subject="failure",  # Default value
-    failure_body="task failure: error_message",  # Default value
-    notify_success=True,  # Default value
-    notify_failure=True  # Default value
+    sender=None,  # 缺省则不发送
+    password=None,  # 缺省则不发送
+    recipients=[],  # 缺省则不发送
+    smtp_server='smtp.exmail.qq.com',  # 缺省值则自动选择
+    smtp_port=465,  # 缺省值则自动选择
+    smtp_ssl=True,  # 缺省值则自动选择
+    success_subject="success",  # 缺省默认值
+    success_body="success",  # 缺省默认值
+    failure_subject="failure",  # 缺省默认值
+    failure_body="task failure: error_message",  # 缺省默认值
+    notify_success=True,  # 缺省默认值
+    notify_failure=True  # 缺省默认值
 )
 ```
 
-- `schedule_time`: Execution time
+- `schedule_time`: 执行时间
 
-If it's a number, the default unit is seconds, and the task will be executed every `schedule_time` seconds. For example, `120` means execute every 2 minutes.
+如果是数字则默认单位是秒，每间隔`schedule_time`秒执行一次，例如`120`，则每2分钟执行一次。
 
-If it's a string, it's treated as a time point in the format `HH:MM`. For example, `08:00` means execute once a day at this time.
+如果是字符串则默认是时间点，请遵从`HH:MM`的格式，例如`08:00`，每天在这个时间点执行一次。
 
-If it's a list, it's treated as multiple time points. For example, `["08:00", "12:00", "16:00"]` means execute once a day at these times.
+如果是列表，则默认是多个时间点，例如`["08:00", "12:00", "16:00"]`，每天在这些时间点执行一次。
 
-If it's a dictionary, the keys are interpreted as follows:
+如果传入的是字典，则解析字典的键：
 
-If the key is a number, it's treated as a date, and the corresponding value follows the above number, string, or list interpretation.
+如果字典的键为数字，则默认是日期，对应字典的值遵从上方数字、字符串、列表的判断。
 
-If the key is a string, it's treated as a day of the week (e.g., for Monday, supported formats include: `1`, `monday`, `Monday`, `MONDAY`, `mon`, `mon.`, `m`, and so on), and the corresponding value follows the above number, string, or list interpretation.
+如果字典的键为字符串，则默认是星期几（以周一为例，支持的写法包括：`1`、`monday`、`Monday`、`MONDAY`、`mon`、`mon.`、`m`，以此类推），对应字典的值遵从上方数字、字符串、列表的判断。
 
-For example, the following schedule executes at 8:00 on the 1st, at 8:00, 12:00, and 16:00 on the 2nd, every hour on the 3rd, and at 8:00 every Monday:
+例如下面是1号的8点、2号的8点、12点、16点、3号每隔一个小时执行一次、每周一的8点执行一次。
 
 ```python:path/to/main.py
 schedule_time = {
@@ -82,26 +114,26 @@ schedule_time = {
 }
 ```
 
-- `sender`: Sender's email address. If you don't want to send emails, you can leave it unconfigured.
-- `password`: Sender's email password. If you don't want to send emails, you can leave it unconfigured.
-- `recipients`: List of recipient email addresses. If you don't want to send emails, you can leave it unconfigured.
-- `smtp_server`: SMTP server address. Default value is auto-select.
-- `smtp_port`: SMTP server port. Default value is auto-select.
-- `smtp_ssl`: Whether to use SSL. Default value is auto-select.
-- `success_subject`: Email subject for successful tasks. Default value provided.
-- `success_body`: Email content for successful tasks. Default value provided.
-- `failure_subject`: Email subject for failed tasks. Default value provided.
-- `failure_body`: Email content for failed tasks. The error message will replace `error_message`. Default value provided.
-- `notify_success`: Whether to send notifications for successful tasks (True/False). If `sender`, `password`, and `recipients` are empty, an exception will be raised.
-- `notify_failure`: Whether to send notifications for failed tasks (True/False). If `sender`, `password`, and `recipients` are empty, an exception will be raised.
+- `sender`: 发件人邮箱，如果不想发送邮件，则可以不配置。
+- `password`: 发件人邮箱密码，如果不想发送邮件，则可以不配置。
+- `recipients`: 收件人邮箱列表，如果不想发送邮件，则可以不配置。
+- `smtp_server`: SMTP服务器地址，缺省值则自动选择。
+- `smtp_port`: SMTP服务器端口，缺省值则自动选择。
+- `smtp_ssl`: 是否使用SSL，缺省值则自动选择。
+- `success_subject`: 任务成功时的邮件主题，缺省默认值。
+- `success_body`: 任务成功时的邮件内容，缺省默认值。
+- `failure_subject`: 任务失败时的邮件主题，缺省默认值。
+- `failure_body`: 任务失败时的邮件内容，错误信息将替换`error_message`，缺省默认值。
+- `notify_success`: 任务成功时是否发送通知（True/False），如果`sender`、`password`、`recipients`为空，则抛出异常。
+- `notify_failure`: 任务失败时是否发送通知（True/False），如果`sender`、`password`、`recipients`为空，则抛出异常。
 
 ```python:path/to/main.py
-import pocwatchdog
+from etools import pocwatch
 
 def your_task():
-    print("Task is running...")
+    print("任务执行中...")
 
-pocwatchdog.run(
+pocwatch(
     job=your_task, 
     schedule_time="08:00",
     sender='your_email@example.com',
@@ -110,19 +142,11 @@ pocwatchdog.run(
     smtp_server='smtp.exmail.qq.com',
     smtp_port=465,
     smtp_ssl=True,
-    success_subject="Task Successful",
-    success_body="The task has been executed successfully.",
-    failure_subject="Task Failed",
-    failure_body="Task execution failed. Error message: error_message",
+    success_subject="任务成功",
+    success_body="任务已成功执行。",
+    failure_subject="任务失败",
+    failure_body="任务执行失败，错误信息：error_message",
     notify_success=True,
     notify_failure=True
 )
-```
-
-## Testing
-
-Run the test cases:
-
-```bash
-python -m unittest tests/test_pocwatchdog.py
 ```
