@@ -1,9 +1,9 @@
 ### 安装
 
-使用 pip 安装 etools:
+使用 pip 安装 etool:
 
 ```bash
-pip install etools
+pip install etool
 ```
 
 
@@ -14,7 +14,7 @@ Speed 是一个测试网络、磁盘、内存、GPU性能的工具，可以测�
 ### 使用
 
 ```python
-from etools import Speed
+from etool import Speed
 
 Speed.test_network_speed()
 Speed.test_disk_speed()
@@ -30,7 +30,7 @@ file_ud 是一个文件上传下载工具，可以上传下载文件。
 ### 使用
 
 ```python
-from etools import file_ud
+from etool import file_ud
 
 file_ud(port=8900)
 ```
@@ -42,7 +42,7 @@ ScreenShare 是一个屏幕共享工具，可以共享屏幕。
 ### 使用
 
 ```python
-from etools import screen_share
+from etool import screen_share
 
 screen_share(port=8900)
 ```
@@ -68,7 +68,7 @@ pocwatch 是一个跨平台的 Python 任务调度器，支持丰富的定时执
 1. 导入 pocwatchdog 模块:
 
 ```python
-from etools import pocwatch
+from etool import pocwatch
 ```
 
 2. 定义您的任务:
@@ -136,7 +136,7 @@ schedule_time = {
 - `failure_body`: 任务失败时的邮件内容，subject和body只填一个则会subject和body相同
 
 ```python:path/to/main.py
-from etools import pocwatch
+from etool import pocwatch
 
 def your_task():
     print("任务执行中...")
