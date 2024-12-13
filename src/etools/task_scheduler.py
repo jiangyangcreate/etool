@@ -22,12 +22,12 @@ def pocwatch(
     smtp_server: Optional[str] = None,
     smtp_port: Optional[int] = None,
     smtp_ssl: bool = True,
-    success_subject: str = "success",
-    success_body: str = "success",
+    success_subject: str = "",
+    success_body: str = "",
     success_file_path: Optional[str] = None,
     success_img_path: Optional[str] = None,
-    failure_subject: str = "failure",
-    failure_body: str = "task failure: error_message",
+    failure_subject: str = "",
+    failure_body: str = "",
     failure_file_path: Optional[str] = None,
     failure_img_path: Optional[str] = None,
     notify_success: bool = False,
@@ -51,6 +51,21 @@ def pocwatch(
     :param notify_success: Whether to send notification on success
     :param notify_failure: Whether to send notification on failure
     """
+    if bool(success_subject) != bool(success_body):
+        if not bool(success_subject):
+            success_subject = success_body
+        else:
+            success_body = success_subject
+
+    if bool(failure_subject) != bool(failure_body):
+        if not bool(failure_subject):
+            failure_subject = failure_body
+        else:
+            failure_body = failure_subject
+
+    notify_success = bool(success_subject) or bool(success_body)
+    notify_failure = bool(failure_subject) or bool(failure_body)
+
     # When notifications are enabled, sender, password, and recipients must be provided
     if (notify_success or notify_failure) and (
         not sender or not password or not recipients

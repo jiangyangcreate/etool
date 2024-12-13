@@ -80,12 +80,12 @@ pocwatch(
     smtp_server='smtp.exmail.qq.com',  # 缺省值则自动选择
     smtp_port=465,  # 缺省值则自动选择
     smtp_ssl=True,  # 缺省值则自动选择
-    success_subject="success",  # 缺省默认值
+
+    success_subject="success",  # 缺省默认值 subject和body只填一个则会subject和body相同
     success_body="success",  # 缺省默认值
-    failure_subject="failure",  # 缺省默认值
+
+    failure_subject="failure",  # 缺省默认值 subject和body只填一个则会subject和body相同
     failure_body="task failure: error_message",  # 缺省默认值
-    notify_success=True,  # 缺省默认值
-    notify_failure=True  # 缺省默认值
 )
 ```
 
@@ -120,12 +120,10 @@ schedule_time = {
 - `smtp_server`: SMTP服务器地址，缺省值则自动选择。
 - `smtp_port`: SMTP服务器端口，缺省值则自动选择。
 - `smtp_ssl`: 是否使用SSL，缺省值则自动选择。
-- `success_subject`: 任务成功时的邮件主题，缺省默认值。
-- `success_body`: 任务成功时的邮件内容，缺省默认值。
-- `failure_subject`: 任务失败时的邮件主题，缺省默认值。
-- `failure_body`: 任务失败时的邮件内容，错误信息将替换`error_message`，缺省默认值。
-- `notify_success`: 任务成功时是否发送通知（True/False），如果`sender`、`password`、`recipients`为空，则抛出异常。
-- `notify_failure`: 任务失败时是否发送通知（True/False），如果`sender`、`password`、`recipients`为空，则抛出异常。
+- `success_subject`: 任务成功时的邮件主题，subject和body只填一个则会subject和body相同
+- `success_body`: 任务成功时的邮件内容，subject和body只填一个则会subject和body相同
+- `failure_subject`: 任务失败时的邮件主题，subject和body只填一个则会subject和body相同
+- `failure_body`: 任务失败时的邮件内容，subject和body只填一个则会subject和body相同
 
 ```python:path/to/main.py
 from etools import pocwatch
@@ -146,7 +144,5 @@ pocwatch(
     success_body="任务已成功执行。",
     failure_subject="任务失败",
     failure_body="任务执行失败，错误信息：error_message",
-    notify_success=True,
-    notify_failure=True
 )
 ```
