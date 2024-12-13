@@ -23,7 +23,19 @@ Speed.test_gpu_performance()
 Speed.run_all_tests()
 ```
 
-## ScreenShare
+## file_ud(开发中)
+
+file_ud 是一个文件上传下载工具，可以上传下载文件。
+
+### 使用
+
+```python
+from etools import file_ud
+
+file_ud(port=8900)
+```
+
+## ScreenShare(目前仅兼容windows)
 
 ScreenShare 是一个屏幕共享工具，可以共享屏幕。
 
@@ -39,8 +51,6 @@ screen_share(port=8900)
 ## pocwatch
 
 pocwatch 是一个跨平台的 Python 任务调度器，支持丰富的定时执行任务，甚至是嵌套，并通过邮件发送通知：包括代码的报错信息、文件、截图。
-
-![2134e47ae8ad5ff7d54792840dbe450](https://github.com/user-attachments/assets/37c6d6df-631a-430d-ae42-5ce4b565ff06)
 
 
 ### 特性
