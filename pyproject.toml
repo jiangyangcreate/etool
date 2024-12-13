@@ -4,11 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "etool"
-version = "0.0.1"
+version = "0.0.2"
 authors = [
   { name="Allen", email="jiangyangcreate@gmail.com" },
 ]
-description = "A pocwatchdog package for security monitoring"
+description = "A etool package for security monitoring"
 readme = "README.md"
 requires-python = ">=3.6"
 classifiers = [
@@ -25,5 +25,5 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/jiangyangcreate/pocwatchdog"
-Issues = "https://github.com/jiangyangcreate/pocwatchdog/issues"
+Homepage = "https://github.com/jiangyangcreate/etool"
+Issues = "https://github.com/jiangyangcreate/etool/issues"

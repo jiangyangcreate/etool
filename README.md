@@ -65,7 +65,7 @@ pocwatch 是一个跨平台的 Python 任务调度器，支持丰富的定时执
 
 ### 使用
 
-1. 导入 pocwatchdog 模块:
+1. 导入 etool 模块:
 
 ```python
 from etool import pocwatch
