@@ -23,7 +23,6 @@
 
 import speedtest
 import time
-from datetime import datetime
 import os
 import tempfile
 import random
@@ -35,7 +34,6 @@ class Speed:
     @classmethod
     def test_network_speed(cls):
         """测试网络速度"""
-        print("正在进行网络速度测试...")
         try:
             st = speedtest.Speedtest()
             st.get_best_server()
@@ -49,20 +47,23 @@ class Speed:
                 'upload_speed': f"{upload_speed:.2f} Mbps",
                 'ping': f"{ping:.2f} ms"
             }
-            print("\n网络测试结果:")
-            print(f"下载速度: {cls.results['network']['download_speed']}")
-            print(f"上传速度: {cls.results['network']['upload_speed']}")
-            print(f"延迟: {cls.results['network']['ping']}")
+            info = f'''\n网络测试结果:
+下载速度: {cls.results['network']['download_speed']}
+上传速度: {cls.results['network']['upload_speed']}
+延迟: {cls.results['network']['ping']}
+'''
+            print(info)
+            return info
 
         except Exception as e:
             print(f"网络测试失败: {str(e)}")
             cls.results['network'] = None
+            return f"网络测试失败: {str(e)}"
 
 
     @classmethod
     def test_disk_speed(cls, file_size_mb=100):
         """测试硬盘读写速度"""
-        print("正在进行硬盘速度测试...")
         try:
             # 创建临时测试文件
             temp_file = tempfile.NamedTemporaryFile(delete=False)
@@ -95,17 +96,20 @@ class Speed:
                 'read_speed': f"{read_speed:.2f} MB/s",
                 'write_speed': f"{write_speed:.2f} MB/s"
             }
-            print("\n硬盘测试结果:")
-            print(f"读取速度: {cls.results['disk']['read_speed']}")
-            print(f"写入速度: {cls.results['disk']['write_speed']}")
+            info = f'''\n硬盘测试结果:
+读取速度: {cls.results['disk']['read_speed']}
+写入速度: {cls.results['disk']['write_speed']}
+'''
+            print(info)
+            return info
         except Exception as e:
             print(f"硬盘测试失败: {str(e)}")
             cls.results['disk'] = None
+            return f"硬盘测试失败: {str(e)}"
 
     @classmethod
     def test_memory_speed(cls, size_mb=100):
         """测试内存读写速度"""
-        print("正在进行内存速度测试...")
         try:
             # 写入测试
             start_time = time.time()
@@ -123,17 +127,20 @@ class Speed:
                 'read_speed': f"{read_speed:.2f} MB/s",
                 'write_speed': f"{write_speed:.2f} MB/s"
             }
-            print("\n内存测试结果:")
-            print(f"读取速度: {cls.results['memory']['read_speed']}")
-            print(f"写入速度: {cls.results['memory']['write_speed']}")
+            info = f'''\n内存测试结果:
+读取速度: {cls.results['memory']['read_speed']}
+写入速度: {cls.results['memory']['write_speed']}
+'''
+            print(info)
+            return info
         except Exception as e:
             print(f"内存测试失败: {str(e)}")
             cls.results['memory'] = None
+            return f"内存测试失败: {str(e)}"
 
     @classmethod
     def test_gpu_performance(cls):
         """测试GPU性能"""
-        print("正在进行GPU测试...")
         try:
             pynvml.nvmlInit()
             deviceCount = pynvml.nvmlDeviceGetCount()
@@ -157,34 +164,27 @@ class Speed:
             
             cls.results['gpu'] = gpu_results
             pynvml.nvmlShutdown()
-            print("\nGPU测试结果:")
+            info = f'''\nGPU测试结果:'''
             for i, gpu in enumerate(cls.results['gpu']):
-                print(f"\nGPU {i+1}:")
-                print(f"名称: {gpu['name']}")
-                print(f"总内存: {gpu['total_memory']}")
-                print(f"已用内存: {gpu['used_memory']}")
-                print(f"可用内存: {gpu['free_memory']}")
-                print(f"GPU使用率: {gpu['gpu_utilization']}")
-                print(f"显存使用率: {gpu['memory_utilization']}")
+                info += f'''\nGPU {i+1}:
+名称: {gpu['name']}
+总内存: {gpu['total_memory']}
+已用内存: {gpu['used_memory']}
+可用内存: {gpu['free_memory']}
+GPU使用率: {gpu['gpu_utilization']}
+显存使用率: {gpu['memory_utilization']}'''
+            print(info)
+            return info
         except Exception as e:
             print(f"GPU测试失败: {str(e)}")
             cls.results['gpu'] = None
+            return f"GPU测试失败: {str(e)}"
 
-    @classmethod
-    def run_all_tests(cls):
-        """运行所有性能测试"""
-        start_time = datetime.now()
-        
-        cls.test_network_speed()
-        cls.test_disk_speed()
-        cls.test_memory_speed()
-        cls.test_gpu_performance()
 
 if __name__ == "__main__":
     Speed.test_memory_speed()
     Speed.test_disk_speed()
     Speed.test_gpu_performance()
     Speed.test_network_speed()
-    Speed.run_all_tests()
 
     
