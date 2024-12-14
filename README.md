@@ -1,4 +1,4 @@
-### 安装
+# 安装
 
 使用 pip 安装 etool:
 
@@ -6,153 +6,14 @@
 pip install etool
 ```
 
+# 功能
 
-## Speed
-
-Speed 是一个测试网络、磁盘、内存、GPU性能的工具，可以测试网络速度、磁盘速度、内存速度、GPU性能。
-
-### 使用
-
-```python
-from etool import Speed
-
-Speed.test_network_speed()
-Speed.test_disk_speed()
-Speed.test_memory_speed()
-Speed.test_gpu_performance()
-Speed.run_all_tests()
-```
-
-## file_ud(开发中)
-
-file_ud 是一个文件上传下载工具，可以上传下载文件。
-
-### 使用
-
-```python
-from etool import file_ud
-
-file_ud(port=8900)
-```
-
-## ScreenShare(目前仅兼容windows)
-
-ScreenShare 是一个屏幕共享工具，可以共享屏幕。
-
-### 使用
-
-```python
-from etool import screen_share
-
-screen_share(port=8900)
-```
-
-
-## pocwatch
-
-pocwatch 是一个跨平台的 Python 任务调度器，支持丰富的定时执行任务，甚至是嵌套，并通过邮件发送通知：包括代码的报错信息、文件、截图。
-
-
-### 特性
-
-- 简单易用
-- 跨平台支持 (Windows, Linux, macOS)
-- 灵活的任务调度
-- 可配置的邮件通知 (成功和失败)
-- 自动 SMTP 服务器选择
-- 详细的错误报告
-
-
-### 使用
-
-1. 导入 etool 模块:
-
-```python
-from etool import pocwatch
-```
-
-2. 定义您的任务:
-
-```python
-def your_task():
-    print("任务执行中...")
-```
-
-3. 运行任务调度器:
-
-```python:path/to/main.py
-pocwatch(
-    job=your_task, 
-    schedule_time="08:00",
-    sender=None,  # 缺省则不发送
-    password=None,  # 缺省则不发送
-    recipients=[],  # 缺省则不发送
-    smtp_server='smtp.exmail.qq.com',  # 缺省值则自动选择
-    smtp_port=465,  # 缺省值则自动选择
-    smtp_ssl=True,  # 缺省值则自动选择
-
-    success_subject="success",  # 缺省默认值 subject和body只填一个则会subject和body相同
-    success_body="success",  # 缺省默认值
-
-    failure_subject="failure",  # 缺省默认值 subject和body只填一个则会subject和body相同
-    failure_body="task failure: error_message",  # 缺省默认值
-)
-```
-
-- `schedule_time`: 执行时间
-
-如果是数字则默认单位是秒，每间隔`schedule_time`秒执行一次，例如`120`，则每2分钟执行一次。
-
-如果是字符串则默认是时间点，请遵从`HH:MM`的格式，例如`08:00`，每天在这个时间点执行一次。
-
-如果是列表，则默认是多个时间点，例如`["08:00", "12:00", "16:00"]`，每天在这些时间点执行一次。
-
-如果传入的是字典，则解析字典的键：
-
-如果字典的键为数字，则默认是日期，对应字典的值遵从上方数字、字符串、列表的判断。
-
-如果字典的键为字符串，则默认是星期几（以周一为例，支持的写法包括：`1`、`monday`、`Monday`、`MONDAY`、`mon`、`mon.`、`m`，以此类推），对应字典的值遵从上方数字、字符串、列表的判断。
-
-例如下面是1号的8点、2号的8点、12点、16点、3号每隔一个小时执行一次、每周一的8点执行一次。
-
-```python:path/to/main.py
-schedule_time = {
-    1: "08:00",
-    2: ["08:00", "12:00", "16:00"],
-    3: 216000,
-    "1": "08:00",
-}
-```
-
-- `sender`: 发件人邮箱，如果不想发送邮件，则可以不配置。
-- `password`: 发件人邮箱密码，如果不想发送邮件，则可以不配置。
-- `recipients`: 收件人邮箱列表，如果不想发送邮件，则可以不配置。
-- `smtp_server`: SMTP服务器地址，缺省值则自动选择。
-- `smtp_port`: SMTP服务器端口，缺省值则自动选择。
-- `smtp_ssl`: 是否使用SSL，缺省值则自动选择。
-- `success_subject`: 任务成功时的邮件主题，subject和body只填一个则会subject和body相同
-- `success_body`: 任务成功时的邮件内容，subject和body只填一个则会subject和body相同
-- `failure_subject`: 任务失败时的邮件主题，subject和body只填一个则会subject和body相同
-- `failure_body`: 任务失败时的邮件内容，subject和body只填一个则会subject和body相同
-
-```python:path/to/main.py
-from etool import pocwatch
-
-def your_task():
-    print("任务执行中...")
-
-pocwatch(
-    job=your_task, 
-    schedule_time="08:00",
-    sender='your_email@example.com',
-    password='your_password',
-    recipients=['recipient1@example.com', 'recipient2@example.com'],
-    smtp_server='smtp.exmail.qq.com',
-    smtp_port=465,
-    smtp_ssl=True,
-    success_subject="任务成功",
-    success_body="任务已成功执行。",
-    failure_subject="任务失败",
-    failure_body="任务执行失败，错误信息：error_message",
-)
-```
+| 功能函数                       | 功能简介                           |
+|-------------------------------|----------------------------------|
+| `Speed.test_network_speed()`   | 测试网络速度。                     |
+| `Speed.test_disk_speed()`      | 测试磁盘速度。                     |
+| `Speed.test_memory_speed()`    | 测试内存速度。                     |
+| `Speed.test_gpu_performance()` | 测试GPU性能。                     |
+| `file_ud()`                    | 获取局域网地址，访问后提供内网文件上传下载工具。        |
+| `screen_share()`               | 获取局域网地址，访问后提供内网屏幕共享服务（仅支持Windows）。      |
+| `pocwatch()`                   | Python任务调度器，支持定时任务和邮件通知。点击函数可以查看详细内容 |
