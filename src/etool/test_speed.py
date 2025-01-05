@@ -32,7 +32,7 @@ class Speed:
     results = {}
 
     @classmethod
-    def test_network_speed(cls):
+    def network(cls):
         """测试网络速度"""
         try:
             st = speedtest.Speedtest()
@@ -62,7 +62,7 @@ class Speed:
 
 
     @classmethod
-    def test_disk_speed(cls, file_size_mb=100):
+    def disk(cls, file_size_mb=100):
         """测试硬盘读写速度"""
         try:
             # 创建临时测试文件
@@ -108,7 +108,7 @@ class Speed:
             return f"硬盘测试失败: {str(e)}"
 
     @classmethod
-    def test_memory_speed(cls, size_mb=100):
+    def memory(cls, size_mb=100):
         """测试内存读写速度"""
         try:
             # 写入测试
@@ -139,7 +139,7 @@ class Speed:
             return f"内存测试失败: {str(e)}"
 
     @classmethod
-    def test_gpu_performance(cls):
+    def gpu_memory(cls):
         """测试GPU性能"""
         try:
             pynvml.nvmlInit()
@@ -153,7 +153,7 @@ class Speed:
                 utilization = pynvml.nvmlDeviceGetUtilizationRates(handle)
                 
                 gpu_info = {
-                    'name': name.decode('utf-8'),
+                    'name': name,
                     'total_memory': f"{memory.total / (1024**2):.2f} MB",
                     'used_memory': f"{memory.used / (1024**2):.2f} MB",
                     'free_memory': f"{memory.free / (1024**2):.2f} MB",
@@ -182,9 +182,9 @@ GPU使用率: {gpu['gpu_utilization']}
 
 
 if __name__ == "__main__":
-    Speed.test_memory_speed()
-    Speed.test_disk_speed()
-    Speed.test_gpu_performance()
-    Speed.test_network_speed()
+    Speed.network()
+    Speed.disk()
+    Speed.memory()
+    Speed.gpu_memory()
 
     
