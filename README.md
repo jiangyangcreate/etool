@@ -18,3 +18,11 @@ pip install etool
 | `screen_share()`     | 获取局域网地址，访问后提供内网屏幕共享服务（仅支持 Windows）。             |
 | `pocwatch()`         | Python 任务调度器，支持定时任务和邮件通知。点击函数可以查看详细内容        |
 | `rename_images()`    | 批量重命名图片文件，将图片文件名中的日期部分转换为数字，并生成新的文件名。 |
+| `PdfManager.encrypt_pdf()` | 加密 PDF 文件。 |
+| `PdfManager.decrypt_pdf()` | 解密 PDF 文件。 |
+| `PdfManager.split_by_pages()` | 按页数分割 PDF 文件。 |
+| `PdfManager.split_by_num()` | 按数量分割 PDF 文件。 |
+| `PdfManager.merge_pdfs()` | 合并多个 PDF 文件。 |
+| `PdfManager.insert_pdf()` | 在指定位置插入 PDF 文件。 |
+| `PdfManager.auto_merge()` | 自动合并 PDF 文件。 |
+
