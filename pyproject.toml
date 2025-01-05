@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "etool"
-version = "0.0.3"
+version = "1.2.0"
 authors = [
   { name="Allen", email="jiangyangcreate@gmail.com" },
 ]
