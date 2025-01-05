@@ -22,6 +22,7 @@ dependencies = [
     "pynvml>=11.4.1",
     "flask",
     "pillow",
+    "PyPDF2",
 ]
 
 [project.urls]
