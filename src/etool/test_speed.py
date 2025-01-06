@@ -27,6 +27,8 @@ import os
 import tempfile
 import random
 import pynvml
+import numpy as np
+from numba import cuda
 
 class Speed:
     results = {}
@@ -108,7 +110,7 @@ class Speed:
             return f"硬盘测试失败: {str(e)}"
 
     @classmethod
-    def memory(cls, size_mb=100):
+    def memory(cls, size_mb=1000):
         """测试内存读写速度"""
         try:
             # 写入测试
@@ -140,7 +142,7 @@ class Speed:
 
     @classmethod
     def gpu_memory(cls):
-        """测试GPU性能"""
+        """测试GPU显存使用情况"""
         try:
             pynvml.nvmlInit()
             deviceCount = pynvml.nvmlDeviceGetCount()
@@ -151,14 +153,34 @@ class Speed:
                 name = pynvml.nvmlDeviceGetName(handle)
                 memory = pynvml.nvmlDeviceGetMemoryInfo(handle)
                 utilization = pynvml.nvmlDeviceGetUtilizationRates(handle)
-                
+
+
+                size_bytes = 1000 * 1024 * 1024
+
+                # Generate random data
+                host_data = np.random.rand(size_bytes // 4).astype(np.float32)
+
+                # Write test: Host to Device
+                start_time = time.time()
+                device_data = cuda.to_device(host_data)
+                write_time = time.time() - start_time
+                write_speed = 1000 / write_time
+
+                # 读取显存测试
+                start_time = time.time()
+                device_data.copy_to_host()
+                read_time = time.time() - start_time
+                read_speed = 1000 / read_time
+
                 gpu_info = {
                     'name': name,
                     'total_memory': f"{memory.total / (1024**2):.2f} MB",
                     'used_memory': f"{memory.used / (1024**2):.2f} MB",
                     'free_memory': f"{memory.free / (1024**2):.2f} MB",
                     'gpu_utilization': f"{utilization.gpu}%",
-                    'memory_utilization': f"{utilization.memory}%"
+                    'memory_utilization': f"{utilization.memory}%",
+                    'write_speed': f"{write_speed:.2f} MB/s",
+                    'read_speed': f"{read_speed:.2f} MB/s"
                 }
                 gpu_results.append(gpu_info)
             
@@ -172,7 +194,9 @@ class Speed:
 已用内存: {gpu['used_memory']}
 可用内存: {gpu['free_memory']}
 GPU使用率: {gpu['gpu_utilization']}
-显存使用率: {gpu['memory_utilization']}'''
+显存使用率: {gpu['memory_utilization']}
+写入速度: {gpu['write_speed']}
+读取速度: {gpu['read_speed']}'''
             print(info)
             return info
         except Exception as e:
