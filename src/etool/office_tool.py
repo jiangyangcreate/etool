@@ -1,6 +1,210 @@
 from PyPDF2 import PdfWriter, PdfReader, PdfMerger
 from pathlib import Path
 import os
+from pathlib import Path
+from win32com.client import Dispatch, gencache, DispatchEx
+import win32com.client
+import time
+import ctypes
+from ctypes import wintypes
+
+# 定义类
+
+class PDFConverter:
+    def __init__(self, pathname,outpath):
+        self._handle_postfix = ['doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx']
+        self._filename_list = list()
+        self._export_folder = os.path.join(os.path.abspath('.'), outpath)
+        if not os.path.exists(self._export_folder):
+            os.mkdir(self._export_folder)
+        self._enumerate_filename(pathname)
+
+
+    def _enumerate_filename(self, pathname):
+        full_pathname = os.path.abspath(pathname)
+        if os.path.isfile(full_pathname):
+            if self._is_legal_postfix(full_pathname):
+                self._filename_list.append(full_pathname)
+            else:
+                raise TypeError('文件 {} 后缀名不合法！仅支持如下文件类型：{}。'.format(
+                    pathname, '、'.join(self._handle_postfix)))
+        elif os.path.isdir(full_pathname):
+            for relpath, _, files in os.walk(full_pathname):
+                for name in files:
+                    filename = os.path.join(full_pathname, relpath, name)
+                    if self._is_legal_postfix(filename):
+                        self._filename_list.append(os.path.join(filename))
+        else:
+            raise TypeError('文件/文件夹 {} 不存在或不合法！'.format(pathname))
+
+    def _is_legal_postfix(self, filename):
+        return filename.split('.')[-1].lower() in self._handle_postfix and not os.path.basename(filename).startswith('~')
+
+    def run_conver(self):
+        '''
+        进行批量处理，根据后缀名调用函数执行转换
+        '''
+        print('需要转换的文件数：', len(self._filename_list))
+        for filename in self._filename_list:
+            postfix = filename.split('.')[-1].lower()
+            funcCall = getattr(self, postfix)
+            print('原文件：', filename)
+            funcCall(filename)
+        print('转换完成！')
+
+    def get_short_path_name(self, long_path):
+        """
+        将给定绝对路径转换为短路径（DOS 8.3 格式）。
+        若转换失败或未启用短路径，则仍然返回原路径。
+        """
+        GetShortPathNameW = ctypes.windll.kernel32.GetShortPathNameW
+        GetShortPathNameW.argtypes = [wintypes.LPCWSTR, wintypes.LPWSTR, wintypes.DWORD]
+        GetShortPathNameW.restype = wintypes.DWORD
+        
+        buffer_size = 260
+        output_buf = ctypes.create_unicode_buffer(buffer_size)
+        result = GetShortPathNameW(long_path, output_buf, buffer_size)
+        
+        if result > 0 and result < buffer_size:
+            return output_buf.value
+        else:
+            return long_path
+
+    def doc(self, filename):
+        '''
+        doc 和 docx 文件转换
+        '''
+        name = os.path.basename(filename).split('.')[0] + '.pdf'
+        word = None
+        doc = None
+        
+        try:
+            # 初始化 Word COM 对象
+            gencache.EnsureModule('{00020905-0000-0000-C000-000000000046}', 0, 8, 4)
+            word = DispatchEx('Word.Application')
+            word.Visible = 0
+            word.DisplayAlerts = 0
+            
+            # 转换文件路径为绝对路径短路径
+            abs_path = os.path.abspath(filename)
+            abs_short_path = self.get_short_path_name(abs_path)
+
+            pdf_file = os.path.join(self._export_folder, name)
+            pdf_short_path = self.get_short_path_name(pdf_file)
+
+            # 添加重试机制
+            max_retries = 3
+            retry_count = 0
+            while retry_count < max_retries:
+                try:
+                    doc = word.Documents.Open(
+                        abs_short_path,
+                        ReadOnly=True,
+                        Visible=False,
+                        ConfirmConversions=False
+                    )
+                    # 保存到短路径
+                    doc.SaveAs(pdf_short_path, FileFormat=17)
+                    print(f'成功转换: {filename}')
+                    break
+                except Exception as e:
+                    retry_count += 1
+                    if retry_count == max_retries:
+                        print(f"在 {max_retries} 次尝试后仍然失败: {filename}")
+                        raise
+                    print(f"第 {retry_count} 次尝试失败，准备重试...")
+                    time.sleep(2)  # 等待2秒后重试
+                    
+        except Exception as e:
+            print(f"转换文件失败 {filename}: {str(e)}")
+            raise
+        
+        finally:
+            # 确保清理所有 COM 对象
+            if doc:
+                try:
+                    doc.Close(SaveChanges=False)
+                except:
+                    pass
+            
+            if word:
+                try:
+                    word.Quit()
+                except:
+                    pass
+                
+            # 强制清理 COM 对象
+            if doc:
+                del doc
+            if word:
+                del word
+                
+            # 强制垃圾回收
+            import gc
+            gc.collect()
+
+    def docx(self, filename):
+        self.doc(filename)
+
+    def xls(self, filename):
+        '''
+        xls 和 xlsx 文件转换，并设置为缩放到单页（横向）
+        '''
+        name = os.path.basename(filename).split('.')[0] + '.pdf'
+        exportfile = os.path.join(self._export_folder, name)
+        xlApp = DispatchEx("Excel.Application")
+        xlApp.Visible = False
+        xlApp.DisplayAlerts = 0
+        books = xlApp.Workbooks.Open(filename, False)
+
+        for sheet in books.Worksheets:
+            # 先禁用 Zoom，以便适应多页缩放生效
+            sheet.PageSetup.Zoom = False
+            
+            # 将内容限制在1页宽、1页高
+            sheet.PageSetup.FitToPagesWide = 1
+            sheet.PageSetup.FitToPagesTall = 1
+            
+            # 设置横向打印
+            # xlOrientationPortrait = 1, xlOrientationLandscape = 2
+            sheet.PageSetup.Orientation = 2
+            
+            # 可根据需要设置页边距
+            sheet.PageSetup.LeftMargin = 0
+            sheet.PageSetup.RightMargin = 0
+            sheet.PageSetup.TopMargin = 0
+            sheet.PageSetup.BottomMargin = 0
+            
+            # 根据需要设置纸张大小，比如 A4
+            # from win32com.client import constants
+            # sheet.PageSetup.PaperSize = constants.xlPaperA4
+
+        books.ExportAsFixedFormat(0, exportfile)
+        books.Close(False)
+        print('保存 PDF 文件：', exportfile)
+        xlApp.Quit()
+
+    def xlsx(self, filename):
+        self.xls(filename)
+
+    def ppt(self,filename):
+        """
+        PPT文件导出为pdf格式
+        :param filename: PPT文件的名称
+        :param output_filename: 导出的pdf文件的名称
+        :return:
+        """
+        name = os.path.basename(filename).split('.')[0] + '.pdf'
+        exportfile = os.path.join(self._export_folder, name)
+        ppt_app = win32com.client.Dispatch('PowerPoint.Application')
+        ppt = ppt_app.Presentations.Open(filename)
+        ppt.SaveAs(exportfile, 32)
+        print('保存 PDF 文件：', exportfile)
+        ppt_app.Quit()
+
+    def pptx(self, filename):
+        self.ppt(filename)
+
 
 
 class PdfManager:
