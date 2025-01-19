@@ -25,4 +25,5 @@ __all__ = [
     'IpynbManager',
     'QrcodeManager',
     'ScreateManager',
+    'pocwatch',
 ]
