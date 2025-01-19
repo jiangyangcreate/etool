@@ -45,3 +45,6 @@ SpeedManager.gpu_memory() # GPU测试
 ## 其他
 
 ### 任务调度
+
+### 密码生成
+

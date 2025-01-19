@@ -10,7 +10,7 @@ from ._office._email import EmailManager
 from ._office._ipynb import IpynbManager
 from ._office._qrcode import QrcodeManager
 
-from ._other._screate import ScreateManager
+from ._other._password import PasswordManager
 from ._other._scheduler import pocwatch
 
 __all__ = [
@@ -26,4 +26,5 @@ __all__ = [
     'QrcodeManager',
     'ScreateManager',
     'pocwatch',
+    'PasswordManager',
 ]

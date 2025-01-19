@@ -8,8 +8,9 @@ class EmailManager:
     def __init__(self):
         pass
 
-    def send_mail(self, message, to_addrs, sender_show=None, recipient_show=None, Subject=None,filelanguage = 'cn',filepath=None,imagepath=None, cc_show='')->str:
+    def send_mail(self, message, to_addrs, sender,sender_show=None, recipient_show=None, Subject=None,filelanguage = 'cn',filepath=None,imagepath=None, cc_show='',password=None)->str:
         """
+        :param sender: str 发件人
         :param message: str 邮件内容
         :param Subject: str 邮件主题描述
         :param sender_show: str 发件人显示，不起实际作用如："xxx"
@@ -20,8 +21,8 @@ class EmailManager:
         # 填写真实的发邮件服务器用户名、密码
         if not to_addrs.endswith(','):
             to_addrs = to_addrs + ','
-        user = 'allen_2100@foxmail.com' 
-        password = os.getenv('EMAIL_PASSWORD')
+        if not password:
+            password = os.getenv('EMAIL_PASSWORD')
         #发送附件的方法定义为一个变量
         msg=MIMEMultipart()                             
         # 邮件内容
@@ -57,7 +58,7 @@ class EmailManager:
         # 邮件主题描述
         msg["Subject"] = Subject if Subject else "来自 AI 的邮件"
         # 发件人显示，不起实际作用
-        msg["from"] = sender_show if sender_show else user
+        msg["from"] = sender_show if sender_show else sender
         # 收件人显示，不起实际作用
         msg["to"] = recipient_show if recipient_show else to_addrs
         # 抄送人显示，不起实际作用
@@ -69,9 +70,9 @@ class EmailManager:
         try:
             with SMTP_SSL(host="smtp.qq.com", port=465) as smtp:
                 # 登录发邮件服务器
-                smtp.login(user=user, password=password)
+                smtp.login(user=sender, password=password)
                 # 实际发送、接收邮件配置
-                smtp.sendmail(from_addr=user, to_addrs=to_addrs, msg=msg.as_string())
+                smtp.sendmail(from_addr=sender, to_addrs=to_addrs, msg=msg.as_string())
         except Exception as e:
             if e.smtp_code != -1 :
                 return f"send error.{e}"

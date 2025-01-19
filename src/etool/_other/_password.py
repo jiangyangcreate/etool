@@ -1,6 +1,6 @@
 import string
 import itertools
-class ScreateManager:
+class PasswordManager:
     results = {
                 'all_letters': string.ascii_letters, # 所有字母
                 'upper_letters': string.ascii_uppercase, # 大写字母
@@ -27,4 +27,4 @@ class ScreateManager:
         return self.generate_pwd_list(dic, max_len - 1) + list(allkey)
 
 if __name__ == '__main__':
-    print(ScreateManager().generate_pwd_list(ScreateManager.results['all_letters'] + ScreateManager.results['digits'], 2))
+    print(PasswordManager().generate_pwd_list(PasswordManager.results['all_letters'] + PasswordManager.results['digits'], 2))
