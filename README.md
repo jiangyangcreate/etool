@@ -6,23 +6,42 @@
 pip install etool
 ```
 
-# 功能
+# 功能与使用示例
 
-| 功能函数             | 功能简介                                                                   |
-| -------------------- | -------------------------------------------------------------------------- |
-| `Speed.network()`    | 测试网络速度。                                                             |
-| `Speed.disk()`       | 测试磁盘速度。                                                             |
-| `Speed.memory()`     | 测试内存速度。                                                             |
-| `Speed.gpu_memory()` | 测试 GPU 性能。                                                            |
-| `file_ud()`          | 获取局域网地址，访问后提供内网文件上传下载工具。                           |
-| `screen_share()`     | 获取局域网地址，访问后提供内网屏幕共享服务（仅支持 Windows）。             |
-| `pocwatch()`         | Python 任务调度器，支持定时任务和邮件通知。点击函数可以查看详细内容        |
-| `rename_images()`    | 批量重命名图片文件，将图片文件名中的日期部分转换为数字，并生成新的文件名。 |
-| `PdfManager.encrypt_pdf()` | 加密 PDF 文件。 |
-| `PdfManager.decrypt_pdf()` | 解密 PDF 文件。 |
-| `PdfManager.split_by_pages()` | 按页数分割 PDF 文件。 |
-| `PdfManager.split_by_num()` | 按数量分割 PDF 文件。 |
-| `PdfManager.merge_pdfs()` | 合并多个 PDF 文件。 |
-| `PdfManager.insert_pdf()` | 在指定位置插入 PDF 文件。 |
-| `PdfManager.auto_merge()` | 自动合并 PDF 文件。 |
+## 网络
 
+### 测试网络速度
+
+```python
+from etool import SpeedManager
+SpeedManager.network() # 网络测试
+SpeedManager.disk() # 硬盘测试
+SpeedManager.memory() # 内存测试
+SpeedManager.gpu_memory() # GPU测试
+```
+
+### 分享屏幕
+
+### 分享文件
+
+## 办公
+
+### 批量重命名图片
+
+### PDF处理
+
+### docx处理
+
+### 邮件发送
+
+### 图片处理
+
+### 表格处理
+
+### 二维码生成
+
+### ipynb转换
+
+## 其他
+
+### 任务调度

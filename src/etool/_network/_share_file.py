@@ -1,8 +1,6 @@
 from flask import Flask, request, send_from_directory, render_template_string
 import os
-def file_ud(port=8099):
-
-
+def share_file(port=8902):
     app = Flask(__name__)
 
     # 设置桌面路径和文件夹名称

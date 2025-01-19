@@ -9,7 +9,6 @@ from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from typing import Callable, Union, List, Dict, Optional
-
 import schedule
 
 

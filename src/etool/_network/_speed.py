@@ -30,7 +30,7 @@ import pynvml
 import numpy as np
 from numba import cuda
 
-class Speed:
+class SpeedManager:
     results = {}
 
     @classmethod
@@ -206,9 +206,9 @@ GPU使用率: {gpu['gpu_utilization']}
 
 
 if __name__ == "__main__":
-    Speed.network()
-    Speed.disk()
-    Speed.memory()
-    Speed.gpu_memory()
+    SpeedManager.network() # 网络测试
+    SpeedManager.disk() # 硬盘测试
+    SpeedManager.memory() # 内存测试
+    SpeedManager.gpu_memory() # GPU测试
 
     

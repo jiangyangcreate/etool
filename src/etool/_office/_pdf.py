@@ -1,4 +1,4 @@
-from PyPDF2 import PdfWriter, PdfReader, PdfMerger
+from PyPDF2 import PdfWriter, PdfReader, PdfMerger, PdfFileReader, PdfFileWriter
 from pathlib import Path
 import os
 from pathlib import Path
@@ -7,8 +7,9 @@ import win32com.client
 import time
 import ctypes
 from ctypes import wintypes
-
+from pdf2docx import Converter
 # 定义类
+
 
 class PDFConverter:
     def __init__(self, pathname,outpath):
@@ -205,7 +206,13 @@ class PDFConverter:
     def pptx(self, filename):
         self.ppt(filename)
 
-
+    def pdf2docx(self, filename):
+        '''
+        pdf转docx,纯文字+图片的PDF识别效果最好，超链接等其他格式将不被保留 
+        '''
+        cv = Converter(filename)
+        cv.convert(filename.replace('.pdf', '.docx'), start=0, end=None)
+        cv.close()
 
 class PdfManager:
 
@@ -233,6 +240,43 @@ class PdfManager:
 
     def __init__(self):
         pass
+
+
+
+    def create_watermarks(pdf_file_path,watermark_file_path):
+        """
+        给pdf文件添加水印
+        :param pdf_file_path: pdf文件路径
+        :param watermark_file_path: 水印文件路径
+        :return:
+        """
+
+        def create_watermark(input_pdf, output_pdf, watermark):
+            # 获取水印
+            watermark_obj = PdfFileReader(watermark, strict=False)
+            watermark_page = watermark_obj.getPage(0)
+
+            # 创建读取对象和写入对象
+            pdf_reader = PdfFileReader(input_pdf, strict=False)
+            pdf_writer = PdfFileWriter()
+
+            # 给所有页面添加水印，并新建pdf文件
+            for page in range(pdf_reader.getNumPages()):
+                page = pdf_reader.getPage(page)
+                page.mergePage(watermark_page)
+                pdf_writer.addPage(page)
+
+            with open(output_pdf, 'wb') as out:
+                pdf_writer.write(out)
+
+        for pdf_file in os.listdir(pdf_file_path):
+            if pdf_file[-3:] == 'pdf':
+                input_pdf = pdf_file_path + '/' + pdf_file
+                output_pdf = './水印版物料/'+pdf_file[0:-3]+'pdf'
+                create_watermark(
+                    input_pdf=input_pdf, output_pdf=output_pdf, watermark=watermark_file_path)
+
+
 
     @staticmethod
     def open_pdf_file(filename: Path, mode: str = "rb"):
