@@ -1,5 +1,6 @@
 import string
 import itertools
+import random
 class PasswordManager:
     results = {
                 'all_letters': string.ascii_letters, # 所有字母
@@ -25,6 +26,15 @@ class PasswordManager:
         if max_len == 1:
             return list(allkey)
         return self.generate_pwd_list(dic, max_len - 1) + list(allkey)
-
+    
+    def random_pwd(self, pwd_len):
+        """
+        随机生成密码
+        :param pwd_len: 密码长度
+        :return: 随机密码
+        """
+        characters = self.results['all_letters'] + self.results['digits'] + self.results['punctuation']
+        return ''.join(random.choice(characters) for _ in range(pwd_len))
+    
 if __name__ == '__main__':
-    print(PasswordManager().generate_pwd_list(PasswordManager.results['all_letters'] + PasswordManager.results['digits'], 2))
+    print(PasswordManager().random_pwd(8))
