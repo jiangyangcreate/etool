@@ -114,6 +114,7 @@ def test_excel_manager():
     # 假设 excel_format 方法返回 True 表示成功
     assert ManagerExcel.excel_format('ex1.xlsx', 'result.xlsx') is not None
 
+@pytest.mark.skip(reason="CICD环境没有office组件，跳过")
 def test_pdf_manager():
     # doc、xlsx等转换为pdf(转换一个)
     ManagerPdf.pdfconverter(os.path.join(os.path.dirname(__file__),'pdf','ex1.docx'),os.path.join(os.path.dirname(__file__),'pdf_out'))
