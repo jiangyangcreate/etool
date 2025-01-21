@@ -1,6 +1,5 @@
 import os
-
-os.chdir(".")
+os.chdir("./tests")
 import pytest
 from etool import ManagerSpeed, ManagerShare
 from etool import (
@@ -73,7 +72,7 @@ def test_image_manager():
     assert ManagerImage.merge_UD(["pic1.webp", "pic2.webp"]) is not None
     assert ManagerImage.fill_image("pic1_UD.webp") is not None
     assert isinstance(ManagerImage.cut_image("pic1_UD_fill.webp"), list)
-    assert ManagerImage.rename_images("tests", remove=True) is not None
+    assert ManagerImage.rename_images("image_dir", remove=True) is not None
 
 
 def test_password_manager():

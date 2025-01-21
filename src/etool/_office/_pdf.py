@@ -1,4 +1,4 @@
-from PyPDF2 import PdfWriter, PdfReader, PdfMerger, PdfFileReader, PdfFileWriter
+from pypdf import PdfWriter, PdfReader, PdfMerger, PdfFileReader, PdfFileWriter
 from pathlib import Path
 import os
 from pathlib import Path
