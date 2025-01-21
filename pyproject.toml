@@ -33,7 +33,8 @@ dependencies = [
     "qrcode",
     "scikit-image",
     "pywin32",
-    "pdf2docx"
+    "pdf2docx",
+    "etool"
 ]
 
 [project.urls]
