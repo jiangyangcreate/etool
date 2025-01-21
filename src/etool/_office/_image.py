@@ -1,14 +1,16 @@
 import os
 from PIL import Image
-import re
-import sys
-import winreg
 import skimage.io as io
 import numpy as np
 
-class ImageManager:
-    def merge_LR(self,pics:list): #左右拼接
-        A_wordcould_path = 'wordcould1.png'#合并后图片的名字
+class ManagerImage:
+
+    @staticmethod
+    def merge_LR(pics:list,save_path:str=None)->str: #左右拼接
+        if save_path is None:
+            # 自动读取pics[0]的文件名
+            save_path = os.path.splitext(pics[0])[0]+'_LR'+os.path.splitext(pics[0])[1]
+        LR_save_path = save_path#合并后图片的名字
         #横向拼接
         图片1 = io.imread(pics[0])   # np.ndarray, [h, w, c], 值域(0, 255), RGB
         图片2 = io.imread(pics[1])   # np.ndarray, [h, w, c], 值域(0, 255), RGB
@@ -25,11 +27,15 @@ class ImageManager:
         pj1[:,:图片1_w,:] = 图片1.copy()   #图片图片1在左
         pj1[:,图片2_w:,:] = 图片2.copy()   #图片图片2在右
         pj1=np.array(pj1,dtype=np.uint8)   #将pj1数组元素数据类型的改为"uint8"
-        io.imsave(A_wordcould_path, pj1)   #保存拼接后的图片
+        io.imsave(LR_save_path, pj1)   #保存拼接后的图片
+        return LR_save_path
 
-    def merge_UD(self,pics:list): #上下拼接
-
-        B_wordcould_path = 'wordcould2.png'
+    @staticmethod
+    def merge_UD(pics:list,save_path:str=None)->str: #上下拼接
+        if save_path is None:
+            # 自动读取pics[0]的文件名
+            save_path = os.path.splitext(pics[0])[0]+'_UD'+os.path.splitext(pics[0])[1]
+        UD_save_path = save_path
         # 上面与下面拼接
         图片1 = io.imread(pics[0])   # np.ndarray, [h, w, c], 值域(0, 255), RGB
         图片2 = io.imread(pics[1])   # np.ndarray, [h, w, c], 值域(0, 255), RGB
@@ -46,11 +52,17 @@ class ImageManager:
         pj[:图片1_h,:,:] = 图片1.copy()   #图片图片1在左
         pj[图片2_h:,:,:] = 图片2.copy()   #图片图片2在右
         pj=np.array(pj,dtype=np.uint8)   #将pj数组元素数据类型的改为"uint8"
-        io.imsave(B_wordcould_path, pj)   #保存拼接后的图片
+        io.imsave(UD_save_path, pj)   #保存拼接后的图片
+        return UD_save_path
 
-
-    #将图片填充为正方形
-    def fill_image(self,image):
+    @staticmethod
+    def fill_image(image_path:str,save_path:str=None)->str:
+        """
+        将图片填充为正方形
+        """
+        if save_path is None:
+            save_path = os.path.splitext(image_path)[0]+'_fill'+os.path.splitext(image_path)[1]
+        image = Image.open(image_path)
         width, height = image.size
         #选取长和宽中较大值作为新图片的
         new_image_length = width if width > height else height
@@ -61,45 +73,39 @@ class ImageManager:
             new_image.paste(image, (0, int((new_image_length - height) / 2)))#(x,y)二元组表示粘贴上图相对下图的起始位置
         else:
             new_image.paste(image, (int((new_image_length - width) / 2),0))
-        return new_image
-    #切图
-    def cut_image(self,image):
+        new_image.save(save_path)
+        return save_path
+    
+    @staticmethod
+    def cut_image(image_path:str)->list[str]:
+        """
+        将图片切成九宫格
+        """
+        image = Image.open(image_path)
         width, height = image.size
         item_width = int(width / 3)
-        box_list = []
-        # (left, upper, right, lower)
+        image_list = []
         for i in range(0,3):
             for j in range(0,3):
-                #print((i*item_width,j*item_width,(i+1)*item_width,(j+1)*item_width))
+                save_path = os.path.splitext(image_path)[0]+'_cut'+str(i)+str(j)+os.path.splitext(image_path)[1]
                 box = (j*item_width,i*item_width,(j+1)*item_width,(i+1)*item_width)
-                box_list.append(box)
-        
-        image_list = [image.crop(box) for box in box_list]
-
+                image.crop(box).save(save_path)
+                image_list.append(save_path)
         return image_list
-    #保存
-    def save_images(self,image_list):
-        Desktoppath = winreg.QueryValueEx(winreg.OpenKey(winreg.HKEY_CURRENT_USER,r'Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders'), "Desktop")[0]#获取电脑系统桌面路径
-        os.makedirs(Desktoppath+"\\result") #创建一个文件夹
-        newfiledirs = Desktoppath+"\\result"
-        index = 1
-        for image in image_list:
-            image.save(newfiledirs+"\\"+str(index) + '.png', 'PNG')
-            index += 1
-    def convert_image(self,path):
+    
+    @staticmethod
+    def rename_images(image_folder:str,remove:bool=False)->str:
         """
-        转方图并切成九宫格
+        将图片重命名为日期-宽度-高度.webp，并返回图片信息
+        param:
+            image_folder: 图片文件夹路径
+            remove: 是否删除原图片
+        return:
+            infos: 图片信息
         """
-        image = Image.open(path)#放入图片路径
-        image = self.fill_image(image) #填充
-        image_list = self.cut_image(image) #切割
-        self.save_images(image_list) #保存
-
-    def rename_images(self,path):
         # 定义备份文件夹路径
-        backup_folder = path
-
-        filename_dict = {}
+        backup_folder = image_folder
+        infos = ""
         # 读取备份文件夹下所有图片
         for filename in os.listdir(backup_folder):
             if filename.endswith((".png", ".jpg", ".jpeg", ".bmp", ".tiff")):
@@ -112,36 +118,35 @@ class ImageManager:
                     backup_folder, f"{os.path.splitext(filename)[0]}.webp"
                 )
                 img.save(output_path, "webp", lossless=True)
-                os.remove(img_path)
-                # 匹配文件名中的日期部分
-                match = re.match(r"IMG_(\d{8})_\d+", filename)
-                if match:
-                    # 提取日期部分
-                    date_part = match.group(1)
-                    if date_part in filename_dict:
-                        date_part = date_part + str(filename_dict[date_part])
-                        filename_dict[date_part] += 1
-                    else:
-                        filename_dict[date_part] = 1
-                    # 获取图片尺寸
-                    width, height = img.size
+                if remove:
+                    os.remove(img_path)
+                # 获取照片的拍摄日期
+                exif_data = img._getexif()
+                if exif_data:
+                    # 36867 是 DateTimeOriginal 的标签
+                    date_taken = exif_data.get(36867)
+                    if date_taken:
+                        # 转换日期格式为 YYYYMMDD_HHMMSS
+                        date_time_parts = date_taken.split()
+                        date_part = date_time_parts[0].replace(':', '')
+                        time_part = date_time_parts[1].replace(':', '')
+                        date_part = f"{date_part}{time_part}"
+                        # 获取图片尺寸
+                        width, height = img.size
+                        # 构造新的文件名，包含日期和尺寸
+                        new_filename = f"{date_part}-{width}-{height}.webp"
+                        # 获取完整的文件路径
+                        new_file_path = os.path.join(backup_folder, new_filename)
+                        # 重命名文件
+                        os.rename(output_path, new_file_path)
 
-                    # 构造新的文件名，包含日期和尺寸
-                    new_filename = f"{date_part}-{width}-{height}.webp"
+                        # 构造字典并添加到列表中
+                        info = '''id: {file_id},
+            width: {width},
+            height: {height},
+            title: "None", 
+            description: "None"'''.format(file_id=date_part, width=width, height=height)
+                        info = "{"+info+"},"+"\n"
+                        infos += info
 
-                    # 获取完整的文件路径
-                    new_file_path = os.path.join(backup_folder, new_filename)
-
-                    # 重命名文件
-                    
-                    os.rename(output_path, new_file_path)
-
-                    # 构造字典并添加到列表中
-                    info = '''id: {file_id},
-        width: {width},
-        height: {height},
-        title: "None", 
-        description: "None"'''.format(file_id=date_part, width=width, height=height)
-                    infos = "{"+info+"},"
-
-                    return infos
+        return infos

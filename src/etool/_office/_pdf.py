@@ -214,7 +214,7 @@ class PDFConverter:
         cv.convert(filename.replace('.pdf', '.docx'), start=0, end=None)
         cv.close()
 
-class PdfManager:
+class ManagerPdf(PDFConverter):
 
     '''
     PDF 文件管理器，提供加密、解密、分割、合并等功能
@@ -239,10 +239,9 @@ class PdfManager:
 
 
     def __init__(self):
-        pass
+        super().__init__()
 
-
-
+    @staticmethod
     def create_watermarks(pdf_file_path,watermark_file_path):
         """
         给pdf文件添加水印
@@ -302,16 +301,15 @@ class PdfManager:
         """写入PDF文件"""
         with filename.open("wb") as output_file:
             writer.write(output_file)
-
+    @staticmethod
     def encrypt_pdf(
-        self,
         filename: Path,
         new_password: str,
         old_password: str = None,
         encrypted_filename: Path = None,
     ):
         """对PDF文件进行加密"""
-        pdf_reader = self.get_reader(filename, old_password)
+        pdf_reader = ManagerPdf.get_reader(filename, old_password)
         if pdf_reader is None:
             return
 
@@ -322,17 +320,16 @@ class PdfManager:
         if encrypted_filename is None:
             encrypted_filename = filename.with_name(f"{filename.stem}_encrypted.pdf")
 
-        self.write_pdf(pdf_writer, encrypted_filename)
+        ManagerPdf.write_pdf(pdf_writer, encrypted_filename)
         print(f"加密后的文件保存为: {encrypted_filename}")
-
+    @staticmethod
     def decrypt_pdf(
-        self,
         filename: Path,
         password: str,
         decrypted_filename: Path = None,
     ):
         """将加密的PDF文件解密"""
-        pdf_reader = self.get_reader(filename, password)
+        pdf_reader = ManagerPdf.get_reader(filename, password)
         if pdf_reader is None:
             return
 
@@ -346,17 +343,16 @@ class PdfManager:
         if decrypted_filename is None:
             decrypted_filename = filename.with_name(f"{filename.stem}_decrypted.pdf")
 
-        self.write_pdf(pdf_writer, decrypted_filename)
+        ManagerPdf.write_pdf(pdf_writer, decrypted_filename)
         print(f"解密后的文件保存为: {decrypted_filename}")
-
+    @staticmethod
     def split_by_pages(
-        self,
         filename: Path,
         pages_per_split: int,
         password: str = None,
     ):
         """将PDF文件按照页数进行分割"""
-        pdf_reader = self.get_reader(filename, password)
+        pdf_reader = ManagerPdf.get_reader(filename, password)
         if pdf_reader is None:
             return
 
@@ -376,18 +372,17 @@ class PdfManager:
                 pdf_writer.add_page(pdf_reader.pages[page])
 
             split_filename = filename.with_name(f"{filename.stem}_part{split_num + 1}.pdf")
-            self.write_pdf(pdf_writer, split_filename)
+            ManagerPdf.write_pdf(pdf_writer, split_filename)
             print(f"生成: {split_filename}")
-
+    @staticmethod
     def split_by_num(
-        self,
         filename: Path,
         num_splits: int,
         password: str = None,
     ):
         """将PDF文件分为指定份数"""
         try:
-            pdf_reader = self.get_reader(filename, password)
+            pdf_reader = ManagerPdf.get_reader(filename, password)
             if pdf_reader is None:
                 return
 
@@ -414,15 +409,14 @@ class PdfManager:
                     pdf_writer.add_page(pdf_reader.pages[page])
 
                 split_filename = filename.with_name(f"{filename.stem}_part{split_num}.pdf")
-                self.write_pdf(pdf_writer, split_filename)
+                ManagerPdf.write_pdf(pdf_writer, split_filename)
                 print(f"生成: {split_filename}")
                 start = end
 
         except Exception as e:
             print(f"分割PDF时发生错误: {e}")
-
+    @staticmethod
     def merge_pdfs(
-        self,
         filenames: list,
         merged_name: Path,
         passwords: list = None,
@@ -436,7 +430,7 @@ class PdfManager:
 
         for idx, file in enumerate(filenames):
             password = passwords[idx] if passwords else None
-            pdf_reader = self.get_reader(file, password)
+            pdf_reader = ManagerPdf.get_reader(file, password)
             if not pdf_reader:
                 print(f"跳过文件: {file}")
                 continue
@@ -446,9 +440,8 @@ class PdfManager:
         with merged_name.open("wb") as f_out:
             merger.write(f_out)
         print(f"合并后的文件保存为: {merged_name}")
-
+    @staticmethod
     def insert_pdf(
-        self,
         pdf1: Path,
         pdf2: Path,
         insert_page_num: int,
@@ -457,8 +450,8 @@ class PdfManager:
         password2: str = None,
     ):
         """将pdf2插入到pdf1的指定页后"""
-        pdf1_reader = self.get_reader(pdf1, password1)
-        pdf2_reader = self.get_reader(pdf2, password2)
+        pdf1_reader = ManagerPdf.get_reader(pdf1, password1)
+        pdf2_reader = ManagerPdf.get_reader(pdf2, password2)
         if not pdf1_reader or not pdf2_reader:
             return
 
@@ -470,18 +463,18 @@ class PdfManager:
             return
 
         merger = PdfMerger()
-        with PdfManager.open_pdf_file(pdf1, "rb") as f_pdf1:
+        with ManagerPdf.open_pdf_file(pdf1, "rb") as f_pdf1:
             merger.append(f_pdf1, pages=(0, insert_page_num))
-        with PdfManager.open_pdf_file(pdf2, "rb") as f_pdf2:
+        with ManagerPdf.open_pdf_file(pdf2, "rb") as f_pdf2:
             merger.append(f_pdf2)
-        with PdfManager.open_pdf_file(pdf1, "rb") as f_pdf1:
+        with ManagerPdf.open_pdf_file(pdf1, "rb") as f_pdf1:
             merger.append(f_pdf1, pages=(insert_page_num, len(pdf1_reader.pages)))
 
         with merged_name.open("wb") as f_out:
             merger.write(f_out)
         print(f"插入后的文件保存为: {merged_name}")
-
-    def auto_merge(self, path: Path, result_name: Path = None):
+    @staticmethod   
+    def auto_merge(path: Path, result_name: Path = None):
         """自动合并指定目录下的所有PDF文件"""
         if not path.is_dir():
             print(f"{path} 不是一个有效的目录！")
@@ -492,7 +485,7 @@ class PdfManager:
 
         pdf_files = sorted(path.glob("*.pdf"))
         for pdf in pdf_files:
-            pdf_reader = self.get_reader(pdf)
+            pdf_reader = ManagerPdf.get_reader(pdf)
             if pdf_reader is None:
                 print(f"忽略加密文件或无法读取的文件: {pdf}")
                 continue

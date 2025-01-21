@@ -4,15 +4,16 @@ import re
 import cv2
 import numpy as np
 
-class DocxManager:
-    def __init__(self):
-        pass
-
-    def replace_words(self, path, old, new):
+class ManagerDocx:
+    @staticmethod
+    def replace_words(path: str, old: str, new: str) -> None:
         """
-        :param path:文件路径
-        :param old:需要替换的keyword
-        :param new:新的替换后的keyword
+        替换Word文档中的关键词。
+
+        :param path: 文件路径
+        :param old: 需要替换的关键词
+        :param new: 新的替换后的关键词
+        :return: None
         """
         if path.endswith(".docx"):
             # 不支持读取doc格式的文件
@@ -24,37 +25,33 @@ class DocxManager:
                 doc.save(path)
         else:
             raise ValueError("只支持docx文件格式!")
-        
-    
-    def change_forward(self, word_path, result_path):
-        """
-        更改Word方向
-        :param word_path: word文件路径
-        :param result_path: 结果文件路径
+        return path
 
-        use:
-        path = 'Robot'
-        spam=os.listdir(path)
-        os.chdir(path)
-        for i in spam:
-            if i.endswith('.docx'):
-                get_pictures(str(i),os.getcwd())
+    @staticmethod
+    def change_forward(word_path: str, save_path: str) -> None:
         """
-        if not os.path.exists(result_path):
-            os.makedirs(result_path)
+        更改Word文档的页面方向。
+
+        :param word_path: Word文件路径
+        :param result_path: 结果文件路径
+        :return: None
+        """
         doc = docx.Document(word_path)
         for section in doc.sections:
             # 交替宽高
-            section.page_width,section.page_height = section.page_height ,section.page_width
+            section.page_width, section.page_height = section.page_height, section.page_width
         # 保存为新文件
-        doc.save(os.path.join(result_path,word_path)) 
+        doc.save(save_path) 
+        return save_path
 
-    def get_pictures(self, word_path, result_path):
+    @staticmethod
+    def get_pictures(word_path: str, result_path: str) -> str:
         """
-        图片提取
-        :param word_path: word路径
-        :result_path: 保存路径
-        :return: 
+        从Word文档中提取图片并保存。
+
+        :param word_path: Word文件路径
+        :param result_path: 图片保存路径
+        :return: 图片保存路径
         """
         # 创建保存路径
         if not os.path.exists(result_path):
@@ -82,3 +79,5 @@ class DocxManager:
                     f.write(rel.target_part.blob)
             else:
                 pass
+        return result_path
+    

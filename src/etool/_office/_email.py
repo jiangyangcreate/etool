@@ -4,11 +4,10 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.image import MIMEImage
 import os
 
-class EmailManager:     
-    def __init__(self):
-        pass
+class ManagerEmail:     
 
-    def send_mail(self, message, to_addrs, sender,sender_show=None, recipient_show=None, Subject=None,filelanguage = 'cn',filepath=None,imagepath=None, cc_show='',password=None)->str:
+    @staticmethod
+    def send_email(message, to_addrs, sender,sender_show=None, recipient_show=None, Subject=None,filelanguage = 'cn',filepath=None,imagepath=None, cc_show='',password=None)->str:
         """
         :param sender: str 发件人
         :param message: str 邮件内容

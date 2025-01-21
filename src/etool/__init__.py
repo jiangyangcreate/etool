@@ -1,30 +1,27 @@
-from ._network._speed import SpeedManager
-from ._network._share_screen import screen_share
-from ._network._share_file import share_file
+from ._network._speed import ManagerSpeed
+from ._network._share import ManagerShare
 
-from ._office._image import ImageManager
-from ._office._pdf import PdfManager
-from ._office._docx import DocxManager
-from ._office._excel import ExcelManager
-from ._office._email import EmailManager
-from ._office._ipynb import IpynbManager
-from ._office._qrcode import QrcodeManager
+from ._other._password import ManagerPassword
+from ._other._scheduler import ManagerScheduler
 
-from ._other._password import PasswordManager
-from ._other._scheduler import pocwatch
+from ._office._image import ManagerImage
+from ._office._email import ManagerEmail
+from ._office._docx import ManagerDocx
+from ._office._excel import ManagerExcel
+from ._office._ipynb import ManagerIpynb
+from ._office._qrcode import ManagerQrcode
+from ._office._pdf import ManagerPdf
 
 __all__ = [
-    'SpeedManager',
-    'screen_share',
-    'share_file',
-    'ImageManager',
-    'PdfManager',
-    'DocxManager',
-    'ExcelManager',
-    'EmailManager',
-    'IpynbManager',
-    'QrcodeManager',
-    'ScreateManager',
-    'pocwatch',
-    'PasswordManager',
+    "ManagerSpeed",
+    "ManagerShare",
+    "ManagerPassword",
+    "ManagerScheduler",
+    "ManagerImage",
+    "ManagerEmail",
+    "ManagerDocx",
+    "ManagerExcel",
+    "ManagerIpynb",
+    "ManagerQrcode",
+    "ManagerPdf",
 ]

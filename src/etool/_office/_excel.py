@@ -2,21 +2,23 @@ import copy
 import openpyxl
 from openpyxl.utils import get_column_letter
 
-class ExcelManager:
-    def excel_format(self, path, save_path):
+class ManagerExcel:
+    @staticmethod
+    def excel_format(path, save_path):
         """
         复制excel文件，并保留格式
         :param path: 源文件路径
         :param save_path: 保存路径
+        :return: 保存路径
         """
         wb = openpyxl.load_workbook(path)
-        wb2 = openpyxl.Workbook()
+        wb_new = openpyxl.Workbook()
 
         sheetnames = wb.sheetnames
         for sheetname in sheetnames:
 
             sheet = wb[sheetname]
-            sheet2 = wb2.create_sheet(sheetname)
+            sheet2 = wb_new.create_sheet(sheetname)
 
             # 复制tab颜色
             sheet2.sheet_properties.tabColor = sheet.sheet_properties.tabColor
@@ -66,9 +68,10 @@ class ExcelManager:
                         # 复制对齐样式
                         target_cell.alignment = copy.copy(source_cell.alignment)
 
-        if 'Sheet' in wb2.sheetnames:
-            del wb2['Sheet']
-        wb2.save(save_path)
+        if 'Sheet' in wb_new.sheetnames:
+            del wb_new['Sheet']
+        wb_new.save(save_path)
 
         wb.close()
-        wb2.close()
+        wb_new.close()
+        return save_path

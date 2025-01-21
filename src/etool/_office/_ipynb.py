@@ -1,47 +1,57 @@
 import os
 import json
+from typing import List
 
-class IpynbManager:
-    def __init__(self):
-        pass
-
-    def merge_ipynb(self,wpt):
+class ManagerIpynb:
+    @staticmethod
+    def merge_notebooks(directory_path: str) -> str:
         """
-        合并ipynb文件
-        :param wpt: 文件路径
+        合并多个ipynb文件到一个文件中。
+        
+        :param directory_path: 包含ipynb文件的文件夹路径
+        :return: 合并后的ipynb文件路径
         """
-        if wpt.endswith("/"):
-            return
-        else:
-            wpt = wpt + "/"
-        path = wpt[:-1]
+        if not directory_path.endswith("/"):
+            directory_path += "/"
+        base_path: str = directory_path.rstrip("/")
 
-        for root, dirs, files in os.walk(wpt):
-            flst = files
-        flst = [wpt + f for f in flst if f.endswith(".ipynb")]
-        jmain = json.load(open(flst[0], "r", encoding="utf-8"))
-        for f in flst[1:]:
-            jn = json.load(open(f, "r", encoding="utf-8"))
-            jmain["cells"].extend(jn["cells"])
+        notebook_files: List[str] = [
+            os.path.join(directory_path, f) for f in os.listdir(directory_path) if f.endswith(".ipynb")
+        ]
 
-        with open("{}.ipynb".format(path), "w", encoding="utf-8") as wf:
-            json.dump(jmain, wf)  # 写入文件
+        if not notebook_files:
+            return None
 
-    # ipynb转md
-    def ipynb2md(self,wpt, save_path=""):
-        md_file_name = os.path.join(save_path, wpt.replace(".ipynb", ".md"))
-        file_name = wpt.split("\\")[-1].split(".")[0]
+        main_notebook: dict = json.load(open(notebook_files[0], "r", encoding="utf-8"))
+        for notebook_file in notebook_files[1:]:
+            current_notebook: dict = json.load(open(notebook_file, "r", encoding="utf-8"))
+            main_notebook["cells"].extend(current_notebook["cells"])
+
+        with open(f"{base_path}.ipynb", "w", encoding="utf-8") as output_file:
+            json.dump(main_notebook, output_file)
+
+        return f"{base_path}.ipynb"
+
+    @staticmethod
+    def convert_notebook_to_markdown(notebook_path: str, output_directory: str = "") -> str:
+        """
+        将ipynb文件转换为Markdown格式并保存。
+        
+        :param notebook_path: ipynb文件路径
+        :param output_directory: 保存Markdown文件的目录
+        :return: 保存的Markdown文件路径
+        """
+        markdown_file_name: str = os.path.join(output_directory, notebook_path.replace(".ipynb", ".md"))
 
         try:
-            print(wpt)
-            ja = json.load(open(wpt, "r", encoding="utf-8"))
-            md_str = ""  # 两种模式：直接装到一个字符串里或装到列表里，一行是一个字符串
+            notebook_content: dict = json.load(open(notebook_path, "r", encoding="utf-8"))
+            markdown_content: str = ""
 
-            for c in ja["cells"]:
-                if c["cell_type"] == "markdown":
-                    md_str = md_str + "\n" + "".join(c["source"]) + "\n\n"
-                elif c["cell_type"] == "code":
-                    md_str = md_str + "\n" + "".join(c["source"]) + "\n\n"
-        except Exception as e:
-            print(e)
-
+            for cell in notebook_content["cells"]:
+                if cell["cell_type"] == "markdown":
+                    markdown_content += "\n" + "".join(cell["source"]) + "\n\n"
+                elif cell["cell_type"] == "code":
+                    markdown_content += "\n" + "".join(cell["source"]) + "\n\n"
+        except Exception as error:
+            print(error)
+        return markdown_file_name
