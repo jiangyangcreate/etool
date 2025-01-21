@@ -29,7 +29,6 @@ class ManagerScheduler:
             for time in schedule_time:
                 print(f"每天在 {time} 执行一次")
         elif isinstance(schedule_time, dict):
-            print(123123213)
             for key, value in schedule_time.items():
                 if isinstance(key, int):
                     # 处理特定日期

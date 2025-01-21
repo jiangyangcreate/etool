@@ -125,11 +125,6 @@ def test_pdf_manager():
     # 给pdf文件添加水印（一个目录下的所有文件）
     ManagerPdf.create_watermarks(os.path.join(os.path.dirname(__file__),'pdf_out'),os.path.join(os.path.dirname(__file__),'pdf_out','watermarks.pdf'),os.path.join(os.path.dirname(__file__),'pdf_out_watermark'))
 
-    # 加密pdf文件
-    ManagerPdf.encrypt_pdf(os.path.join(os.path.dirname(__file__),'pdf_out','ex1.pdf'),r"1234567890")
-    # 解密pdf文件
-    ManagerPdf.decrypt_pdf(os.path.join(os.path.dirname(__file__),'pdf_out','ex1_encrypted.pdf'),r"1234567890")
-
     # 合并pdf文件（一个目录下的所有文件）
     ManagerPdf.merge_pdfs(os.path.join(os.path.dirname(__file__),'pdf_out'),os.path.join(os.path.dirname(__file__),'pdf_out','merged.pdf'))
     
@@ -140,3 +135,8 @@ def test_pdf_manager():
 
     # 将pdf ex2插入到pdf ex1的指定页后
     ManagerPdf.insert_pdf(os.path.join(os.path.dirname(__file__),'pdf_out','ex1.pdf'),os.path.join(os.path.dirname(__file__),'pdf_out','ex2.pdf'),0,os.path.join(os.path.dirname(__file__),'pdf_out','pdf_insert.pdf'))
+
+    # 加密pdf文件
+    ManagerPdf.encrypt_pdf(os.path.join(os.path.dirname(__file__),'pdf_out','ex1.pdf'),r"1234567890")
+    # 解密pdf文件
+    ManagerPdf.decrypt_pdf(os.path.join(os.path.dirname(__file__),'pdf_out','ex1_encrypted.pdf'),r"1234567890")
