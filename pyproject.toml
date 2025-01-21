@@ -27,10 +27,13 @@ dependencies = [
     "numpy",
     "numba",
     "opencv-python-headless",
-    "docx",
+    "python-docx",
     "easyqr",
     "MyQR",
     "qrcode",
+    "scikit-image",
+    "pywin32",
+    "pdf2docx"
 ]
 
 [project.urls]
