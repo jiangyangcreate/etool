@@ -42,7 +42,30 @@ ManagerShare.share_file() # 分享文件
 
 ```python
 from etool import ManagerPdf
-# 功能升级，代码重构中
+
+# doc、xlsx等转换为pdf(转换一个)
+ManagerPdf.pdfconverter(os.path.join(os.path.dirname(__file__),'pdf','ex1.docx'),os.path.join(os.path.dirname(__file__),'pdf_out'))
+# doc、xlsx等转换为pdf(转换一个目录下的所有文件)
+ManagerPdf.pdfconverter(os.path.join(os.path.dirname(__file__),'pdf'),os.path.join(os.path.dirname(__file__),'pdf_out'))
+
+# 给pdf文件添加水印（一个文件）
+ManagerPdf.create_watermarks(os.path.join(os.path.dirname(__file__),'pdf_out','ex1.pdf'),os.path.join(os.path.dirname(__file__),'pdf_out','watermarks.pdf'),os.path.join(os.path.dirname(__file__),'pdf_out_watermark'))
+# 给pdf文件添加水印（一个目录下的所有文件）
+ManagerPdf.create_watermarks(os.path.join(os.path.dirname(__file__),'pdf_out'),os.path.join(os.path.dirname(__file__),'pdf_out','watermarks.pdf'),os.path.join(os.path.dirname(__file__),'pdf_out_watermark'))
+
+
+# 加密pdf文件
+ManagerPdf.encrypt_pdf(os.path.join(os.path.dirname(__file__),'pdf_out','ex1.pdf'),r"1234567890")
+# 解密pdf文件
+ManagerPdf.decrypt_pdf(os.path.join(os.path.dirname(__file__),'pdf_out','ex1_encrypted.pdf'),r"1234567890")
+
+# 拆分pdf文件（按页数）每3页一份
+ManagerPdf.split_by_pages(os.path.join(os.path.dirname(__file__),'pdf_out','merged.pdf'),3)
+# 拆分pdf文件（按份数）生成2份
+ManagerPdf.split_by_num(os.path.join(os.path.dirname(__file__),'pdf_out','merged.pdf'),2)
+
+# 将pdf ex2插入到pdf ex1的指定页后
+ManagerPdf.insert_pdf(os.path.join(os.path.dirname(__file__),'pdf_out','ex1.pdf'),os.path.join(os.path.dirname(__file__),'pdf_out','ex2.pdf'),0,os.path.join(os.path.dirname(__file__),'pdf_out','pdf_insert.pdf'))
 ```
 
 ### docx处理
@@ -159,7 +182,13 @@ schedule_time = {
 3: 216000,
 "1": "08:00",
 }
+
 """
+# 如果你不确定调度时间，可以先使用parse_schedule_time函数，确认一下
+ManagerScheduler.parse_schedule_time(120)
+ManagerScheduler.parse_schedule_time("08:00")
+ManagerScheduler.parse_schedule_time(["08:00", "12:00", "16:00"])
+ManagerScheduler.parse_schedule_time({1: "08:00", 2: ["08:00", "12:00", "16:00"], 3: 216000, "1": "08:00"})
 
 ```
 

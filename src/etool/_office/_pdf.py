@@ -12,10 +12,10 @@ from pdf2docx import Converter
 
 
 class PDFConverter:
-    def pdfconverter(self, pathname:Path,outpath:Path):
+    def pdfconverter(self, pathname:str,outpath:str):
         self._handle_postfix = ['doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx']
         self._filename_list = list()
-        self._export_folder = os.path.join(os.path.abspath('.'), outpath)
+        self._export_folder = outpath
         if not os.path.exists(self._export_folder):
             os.mkdir(self._export_folder)
         self._enumerate_filename(pathname)
@@ -232,7 +232,7 @@ class ManagerPdf():
     '''
 
     @staticmethod
-    def pdfconverter(pathname:Path,outpath:Path):
+    def pdfconverter(pathname:str,outpath:str):
         '''
         批量转换文件为pdf
         :param pathname: 需要转换的文件路径
@@ -243,40 +243,40 @@ class ManagerPdf():
         pdfconverter.pdfconverter(pathname,outpath)
 
     @staticmethod
-    def create_watermarks(pdf_file_path,watermark_file_path):
+    def create_watermarks(pdf_file_path:str,watermark_file_path:str,save_path:str="watermarks"):
         """
         给pdf文件添加水印
-        :param pdf_file_path: pdf文件路径
+        :param pdf_file_path: pdf 文件路径
         :param watermark_file_path: 水印文件路径
+        :param save_path: 保存至文件夹路径
         :return:
         """
 
-        def create_watermark(input_pdf, output_pdf, watermark):
+        def create_watermark(input_pdf, watermark, output_pdf):
             # 获取水印
             watermark_obj = PdfReader(watermark, strict=False)
-            watermark_page = watermark_obj.getPage(0)
+            watermark_page = watermark_obj.get_page(0)
 
             # 创建读取对象和写入对象
             pdf_reader = PdfReader(input_pdf, strict=False)
             pdf_writer = PdfWriter()
 
             # 给所有页面添加水印，并新建pdf文件
-            for page in range(pdf_reader.getNumPages()):
-                page = pdf_reader.getPage(page)
-                page.mergePage(watermark_page)
-                pdf_writer.addPage(page)
+            for page in range(pdf_reader.get_num_pages()):
+                page = pdf_reader.get_page(page)
+                page.merge_page(watermark_page)
+                pdf_writer.add_page(page)
 
             with open(output_pdf, 'wb') as out:
                 pdf_writer.write(out)
-
-        for pdf_file in os.listdir(pdf_file_path):
-            if pdf_file[-3:] == 'pdf':
-                input_pdf = pdf_file_path + '/' + pdf_file
-                output_pdf = './水印版物料/'+pdf_file[0:-3]+'pdf'
-                create_watermark(
-                    input_pdf=input_pdf, output_pdf=output_pdf, watermark=watermark_file_path)
-
-
+        # 判断是文件还是文件夹
+        if os.path.isfile(pdf_file_path):
+            create_watermark(pdf_file_path,watermark_file_path,os.path.join(save_path,os.path.basename(pdf_file_path)))
+        else:
+            for pdf_file in os.listdir(pdf_file_path):
+                if pdf_file[-3:] == 'pdf':
+                    input_pdf = os.path.join(pdf_file_path,pdf_file)
+                    create_watermark(input_pdf, watermark_file_path, os.path.join(save_path,os.path.basename(pdf_file)))
 
     @staticmethod
     def open_pdf_file(filename: Path, mode: str = "rb"):
@@ -302,15 +302,16 @@ class ManagerPdf():
         """写入PDF文件"""
         with filename.open("wb") as output_file:
             writer.write(output_file)
+    
     @staticmethod
     def encrypt_pdf(
-        filename: Path,
+        filename: str,
         new_password: str,
         old_password: str = None,
         encrypted_filename: Path = None,
     ):
         """对PDF文件进行加密"""
-        pdf_reader = ManagerPdf.get_reader(filename, old_password)
+        pdf_reader = ManagerPdf.get_reader(Path(filename), old_password)
         if pdf_reader is None:
             return
 
@@ -319,18 +320,19 @@ class ManagerPdf():
         pdf_writer.encrypt(new_password)
 
         if encrypted_filename is None:
-            encrypted_filename = filename.with_name(f"{filename.stem}_encrypted.pdf")
+            encrypted_filename = Path(filename).with_name(f"{Path(filename).stem}_encrypted.pdf")
 
         ManagerPdf.write_pdf(pdf_writer, encrypted_filename)
         print(f"加密后的文件保存为: {encrypted_filename}")
+    
     @staticmethod
     def decrypt_pdf(
-        filename: Path,
+        filename: str,
         password: str,
         decrypted_filename: Path = None,
     ):
         """将加密的PDF文件解密"""
-        pdf_reader = ManagerPdf.get_reader(filename, password)
+        pdf_reader = ManagerPdf.get_reader(Path(filename), password)
         if pdf_reader is None:
             return
 
@@ -342,17 +344,20 @@ class ManagerPdf():
         pdf_writer.append_pages_from_reader(pdf_reader)
 
         if decrypted_filename is None:
-            decrypted_filename = filename.with_name(f"{filename.stem}_decrypted.pdf")
+            decrypted_filename = Path(filename).with_name(f"{Path(filename).stem}_decrypted.pdf")
 
         ManagerPdf.write_pdf(pdf_writer, decrypted_filename)
         print(f"解密后的文件保存为: {decrypted_filename}")
+    
     @staticmethod
     def split_by_pages(
-        filename: Path,
+        filename: str | Path,
         pages_per_split: int,
         password: str = None,
     ):
         """将PDF文件按照页数进行分割"""
+        if isinstance(filename, str):
+            filename = Path(filename)
         pdf_reader = ManagerPdf.get_reader(filename, password)
         if pdf_reader is None:
             return
@@ -372,16 +377,20 @@ class ManagerPdf():
             for page in range(start, end):
                 pdf_writer.add_page(pdf_reader.pages[page])
 
-            split_filename = filename.with_name(f"{filename.stem}_part{split_num + 1}.pdf")
+            split_filename = filename.with_name(f"{filename.stem}_part_by_page{split_num + 1}.pdf")
             ManagerPdf.write_pdf(pdf_writer, split_filename)
             print(f"生成: {split_filename}")
+    
     @staticmethod
     def split_by_num(
-        filename: Path,
+        filename: str | Path,
         num_splits: int,
         password: str = None,
     ):
         """将PDF文件分为指定份数"""
+        if isinstance(filename, str):
+            filename = Path(filename)
+
         try:
             pdf_reader = ManagerPdf.get_reader(filename, password)
             if pdf_reader is None:
@@ -409,17 +418,18 @@ class ManagerPdf():
                 for page in range(start, end):
                     pdf_writer.add_page(pdf_reader.pages[page])
 
-                split_filename = filename.with_name(f"{filename.stem}_part{split_num}.pdf")
+                split_filename = filename.with_name(f"{filename.stem}_part_by_num{split_num}.pdf")
                 ManagerPdf.write_pdf(pdf_writer, split_filename)
                 print(f"生成: {split_filename}")
                 start = end
 
         except Exception as e:
             print(f"分割PDF时发生错误: {e}")
+    
     @staticmethod
     def merge_pdfs(
-        filenames: list,
-        merged_name: Path,
+        filenames: str | list[str],
+        merged_name: str,
         passwords: list = None,
     ):
         """将多个PDF文件合并为一个"""
@@ -427,30 +437,46 @@ class ManagerPdf():
             print("密码列表长度必须与文件列表长度一致！")
             return
 
-        merger = PdfMerger()
+        writer = PdfWriter()
+
+        if isinstance(filenames, str):
+            if os.path.isfile(filenames):
+                filenames = [filenames]
+            elif os.path.isdir(filenames):  
+                filenames = [str(path) for path in Path(filenames).rglob('*.pdf')]
+
 
         for idx, file in enumerate(filenames):
             password = passwords[idx] if passwords else None
-            pdf_reader = ManagerPdf.get_reader(file, password)
+            pdf_reader = ManagerPdf.get_reader(Path(file), password)
             if not pdf_reader:
                 print(f"跳过文件: {file}")
                 continue
-            merger.append(pdf_reader)
+            for page in range(len(pdf_reader.pages)):
+                writer.add_page(pdf_reader.pages[page])
             print(f"已合并: {file}")
 
-        with merged_name.open("wb") as f_out:
-            merger.write(f_out)
+        with Path(merged_name).open("wb") as f_out:
+            writer.write(f_out)
         print(f"合并后的文件保存为: {merged_name}")
+    
     @staticmethod
     def insert_pdf(
-        pdf1: Path,
-        pdf2: Path,
+        pdf1: str | Path,
+        pdf2: str | Path,
         insert_page_num: int,
-        merged_name: Path,
+        merged_name: str | Path,
         password1: str = None,
         password2: str = None,
     ):
         """将pdf2插入到pdf1的指定页后"""
+        if isinstance(pdf1, str):
+            pdf1 = Path(pdf1)
+        if isinstance(pdf2, str):
+            pdf2 = Path(pdf2)
+        if isinstance(merged_name, str):
+            merged_name = Path(merged_name)
+
         pdf1_reader = ManagerPdf.get_reader(pdf1, password1)
         pdf2_reader = ManagerPdf.get_reader(pdf2, password2)
         if not pdf1_reader or not pdf2_reader:
@@ -463,41 +489,15 @@ class ManagerPdf():
             )
             return
 
-        merger = PdfMerger()
+        writer = PdfWriter()
         with ManagerPdf.open_pdf_file(pdf1, "rb") as f_pdf1:
-            merger.append(f_pdf1, pages=(0, insert_page_num))
+            writer.append(f_pdf1, pages=(0, insert_page_num))
         with ManagerPdf.open_pdf_file(pdf2, "rb") as f_pdf2:
-            merger.append(f_pdf2)
+            writer.append(f_pdf2)
         with ManagerPdf.open_pdf_file(pdf1, "rb") as f_pdf1:
-            merger.append(f_pdf1, pages=(insert_page_num, len(pdf1_reader.pages)))
+            writer.append(f_pdf1, pages=(insert_page_num, len(pdf1_reader.pages)))
 
         with merged_name.open("wb") as f_out:
-            merger.write(f_out)
+            writer.write(f_out)
         print(f"插入后的文件保存为: {merged_name}")
-    @staticmethod   
-    def auto_merge(path: Path, result_name: Path = None):
-        """自动合并指定目录下的所有PDF文件"""
-        if not path.is_dir():
-            print(f"{path} 不是一个有效的目录！")
-            return
-
-        merged_filename = result_name or path / "合并.pdf"
-        merger = PdfMerger()
-
-        pdf_files = sorted(path.glob("*.pdf"))
-        for pdf in pdf_files:
-            pdf_reader = ManagerPdf.get_reader(pdf)
-            if pdf_reader is None:
-                print(f"忽略加密文件或无法读取的文件: {pdf}")
-                continue
-            merger.append(pdf_reader, import_outline=True)
-            print(f"已合并: {pdf}")
-
-        with merged_filename.open("wb") as f_out:
-            merger.write(f_out)
-        print(f"\n合并完成，文件保存为: {merged_filename}")
-
-
-if __name__ == '__main__':
-    ManagerPdf.pdfconverter(Path('PDF'),Path('PDF_out'))
-
+    

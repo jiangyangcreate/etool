@@ -4,6 +4,43 @@ from typing import Callable, Union, List, Dict, Optional
 import schedule
 
 class ManagerScheduler:
+
+    @staticmethod
+    def parse_schedule_time(schedule_time):
+        """
+        解析调度时间
+
+        :param schedule_time: 调度时间
+
+        test:
+        parse_schedule_time(120)
+        parse_schedule_time("08:00")
+        parse_schedule_time(["08:00", "12:00", "16:00"])
+        parse_schedule_time({1: "08:00", 2: ["08:00", "12:00", "16:00"], 3: 216000, "1": "08:00"})
+        """
+        if isinstance(schedule_time, int):
+            # 处理秒数间隔
+            print(f"每 {schedule_time} 秒执行一次")
+        elif isinstance(schedule_time, str):
+            # 处理时间点
+            print(f"每天在 {schedule_time} 执行一次")
+        elif isinstance(schedule_time, list):
+            # 处理多个时间点
+            for time in schedule_time:
+                print(f"每天在 {time} 执行一次")
+        elif isinstance(schedule_time, dict):
+            print(123123213)
+            for key, value in schedule_time.items():
+                if isinstance(key, int):
+                    # 处理特定日期
+                    print(f"本月 {key} 号：")
+                    ManagerScheduler.parse_schedule_time(value)
+                elif isinstance(key, str):
+                    # 处理星期几
+                    print(f"每周 周{key} 的调度：")
+                    ManagerScheduler.parse_schedule_time(value)
+        else:
+            print("无效的调度格式")
     @staticmethod
     def pocwatch(
         job: Callable,
