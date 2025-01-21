@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "etool"
-version = "1.3.0"
+version = "1.3.1"
 authors = [
   { name="Allen", email="jiangyangcreate@gmail.com" },
 ]
@@ -23,6 +23,14 @@ dependencies = [
     "flask",
     "pillow",
     "PyPDF2",
+    "openpyxl",
+    "numpy",
+    "numba",
+    "opencv-python-headless",
+    "docx",
+    "easyqr",
+    "MyQR",
+    "qrcode",
 ]
 
 [project.urls]
