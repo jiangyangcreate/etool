@@ -208,7 +208,7 @@ class PDFConverter:
         cv.convert(filename.replace('.pdf', '.docx'), start=0, end=None)
         cv.close()
 
-class ManagerPdf():
+class ManagerPdf:
 
     '''
     PDF 文件管理器，提供加密、解密、分割、合并等功能
@@ -239,8 +239,8 @@ class ManagerPdf():
         :param outpath: 转换后的文件路径
         :return:
         '''
-        pdfconverter = PDFConverter()
-        pdfconverter.pdfconverter(pathname,outpath)
+        converter = PDFConverter()
+        converter.pdfconverter(pathname,outpath)
 
     @staticmethod
     def create_watermarks(pdf_file_path:str,watermark_file_path:str,save_path:str="watermarks"):
