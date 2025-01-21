@@ -28,4 +28,4 @@ jobs:
     - name: Run tests
       run: |
         pip install pytest
-        pytest tests/test_etool.py
+        pytest tests/test_etool.py --disable-warnings

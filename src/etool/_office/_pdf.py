@@ -1,4 +1,4 @@
-from pypdf import PdfWriter, PdfReader, PdfMerger, PdfFileReader, PdfFileWriter
+from pypdf import PdfWriter, PdfReader, PdfMerger, PdfReader, PdfWriter
 from pathlib import Path
 import os
 from pathlib import Path
@@ -12,14 +12,20 @@ from pdf2docx import Converter
 
 
 class PDFConverter:
-    def __init__(self, pathname,outpath):
+    def pdfconverter(self, pathname:Path,outpath:Path):
         self._handle_postfix = ['doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx']
         self._filename_list = list()
         self._export_folder = os.path.join(os.path.abspath('.'), outpath)
         if not os.path.exists(self._export_folder):
             os.mkdir(self._export_folder)
         self._enumerate_filename(pathname)
-
+        print('需要转换的文件数：', len(self._filename_list))
+        for filename in self._filename_list:
+            postfix = filename.split('.')[-1].lower()
+            funcCall = getattr(self, postfix)
+            print('原文件：', filename)
+            funcCall(filename)
+        print('转换完成！')
 
     def _enumerate_filename(self, pathname):
         full_pathname = os.path.abspath(pathname)
@@ -40,18 +46,6 @@ class PDFConverter:
 
     def _is_legal_postfix(self, filename):
         return filename.split('.')[-1].lower() in self._handle_postfix and not os.path.basename(filename).startswith('~')
-
-    def run_conver(self):
-        '''
-        进行批量处理，根据后缀名调用函数执行转换
-        '''
-        print('需要转换的文件数：', len(self._filename_list))
-        for filename in self._filename_list:
-            postfix = filename.split('.')[-1].lower()
-            funcCall = getattr(self, postfix)
-            print('原文件：', filename)
-            funcCall(filename)
-        print('转换完成！')
 
     def get_short_path_name(self, long_path):
         """
@@ -214,7 +208,7 @@ class PDFConverter:
         cv.convert(filename.replace('.pdf', '.docx'), start=0, end=None)
         cv.close()
 
-class ManagerPdf(PDFConverter):
+class ManagerPdf():
 
     '''
     PDF 文件管理器，提供加密、解密、分割、合并等功能
@@ -237,9 +231,16 @@ class ManagerPdf(PDFConverter):
     manager.auto_merge(Path("PDF"))
     '''
 
-
-    def __init__(self):
-        super().__init__()
+    @staticmethod
+    def pdfconverter(pathname:Path,outpath:Path):
+        '''
+        批量转换文件为pdf
+        :param pathname: 需要转换的文件路径
+        :param outpath: 转换后的文件路径
+        :return:
+        '''
+        pdfconverter = PDFConverter()
+        pdfconverter.pdfconverter(pathname,outpath)
 
     @staticmethod
     def create_watermarks(pdf_file_path,watermark_file_path):
@@ -252,12 +253,12 @@ class ManagerPdf(PDFConverter):
 
         def create_watermark(input_pdf, output_pdf, watermark):
             # 获取水印
-            watermark_obj = PdfFileReader(watermark, strict=False)
+            watermark_obj = PdfReader(watermark, strict=False)
             watermark_page = watermark_obj.getPage(0)
 
             # 创建读取对象和写入对象
-            pdf_reader = PdfFileReader(input_pdf, strict=False)
-            pdf_writer = PdfFileWriter()
+            pdf_reader = PdfReader(input_pdf, strict=False)
+            pdf_writer = PdfWriter()
 
             # 给所有页面添加水印，并新建pdf文件
             for page in range(pdf_reader.getNumPages()):
@@ -495,3 +496,8 @@ class ManagerPdf(PDFConverter):
         with merged_filename.open("wb") as f_out:
             merger.write(f_out)
         print(f"\n合并完成，文件保存为: {merged_filename}")
+
+
+if __name__ == '__main__':
+    ManagerPdf.pdfconverter(Path('PDF'),Path('PDF_out'))
+

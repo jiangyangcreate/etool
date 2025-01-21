@@ -63,11 +63,11 @@ from etool import ManagerEmail
 ManagerEmail.send_email(
     sender='1234567890@qq.com',
     password='1234567890',
-    recipients=['1234567890@qq.com'],
+    recipient='1234567890@qq.com',
     subject='测试邮件',
     message='测试邮件内容',
     file_path='test.txt',
-    img_path='test.webp'
+    image_path='test.webp'
 ) # 发送邮件
 ```
 
@@ -119,7 +119,48 @@ ManagerIpynb.convert_notebook_to_markdown(ipynb_dir+'.ipynb', md_dir) # 将ipynb
 
 ```python
 from etool import ManagerScheduler
-# 由于定时发送不宜频繁测试，功能未在README中详细列出
+
+def job():
+    print("job")
+    raise Exception("error")
+
+def func_success():
+    print("success")
+
+def func_failure():
+    print("failure")
+
+ManagerScheduler.pocwatch(job, 2, func_success, func_failure)
+"""
+- `job`: 任务函数
+- `schedule_time`: 执行时间
+- `func_success`: 任务成功时的回调函数
+- `func_failure`: 任务失败时的回调函数
+
+`schedule_time`的格式如下：
+
+如果是数字则默认单位是秒，每间隔`schedule_time`秒执行一次，例如`120`，则每2分钟执行一次。
+
+如果是字符串则默认是时间点，请遵从`HH:MM`的格式，例如`08:00`，每天在这个时间点执行一次。
+
+如果是列表，则默认是多个时间点，例如`["08:00", "12:00", "16:00"]`，每天在这些时间点执行一次。
+
+如果传入的是字典，则解析字典的键：
+
+如果字典的键为数字，则默认是日期，对应字典的值遵从上方数字、字符串、列表的判断。
+
+如果字典的键为字符串，则默认是星期几（以周一为例，支持的写法包括：`1`、`monday`、`Monday`、`MONDAY`、`mon`、`mon.`、`m`，以此类推），对应字典的值遵从上方数字、字符串、列表的判断。
+
+例如下面是1号的8点、2号的8点、12点、16点、3号每隔一个小时执行一次、每周一的8点执行一次。
+
+schedule_time = {
+1: "08:00",
+2: ["08:00", "12:00", "16:00"],
+3: 216000,
+"1": "08:00",
+}
+"""
+
 ```
 
 ### 密码生成

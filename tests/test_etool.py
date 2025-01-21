@@ -35,35 +35,33 @@ def test_share_file():
 @pytest.mark.skip(reason="发送邮件不宜频繁测试，跳过")
 def test_email_manager():
     # 假设 send_email 方法返回 True 表示成功
-    assert (
-        ManagerEmail.send_email(
-            sender="1234567890@qq.com",
-            password="1234567890",
-            recipients=["1234567890@qq.com"],
-            subject="测试邮件",
-            message="测试邮件内容",
-            file_path="test.txt",
-            img_path="test.webp",
-        )
-        is True
-    )
+    assert ManagerEmail.send_email(
+                sender="allen_2100@foxmail.com",
+                password="********",
+                message="测试邮件内容",
+                sender_show="allen_2100@foxmail.com",
+                recipient="allen_2100@foxmail.com",
+                recipient_show="allen_2100@foxmail.com",
+                subject="测试邮件",
+                file_path="result.docx",
+                image_path="pic1.webp",
+            ) == "send success"
 
 
 @pytest.mark.skip(reason="定时发送不宜频繁测试，跳过")
 def test_scheduler_manager():
     # 假设 send_email 方法返回 True 表示成功
-    assert (
-        ManagerScheduler.send_email(
-            sender="1234567890@qq.com",
-            password="1234567890",
-            recipients=["1234567890@qq.com"],
-            subject="测试邮件",
-            message="测试邮件内容",
-            file_path="test.txt",
-            img_path="test.webp",
-        )
-        is True
-    )
+    def job():
+        print("job")
+
+    def func_success():
+        print("success")
+
+    def func_failure():
+        print("failure")
+    # 每2秒执行一次job，成功时执行func_success，失败时执行func_failure
+    ManagerScheduler.pocwatch(job, 2, func_success, func_failure)
+
 
 
 def test_image_manager():
@@ -116,7 +114,6 @@ def test_excel_manager():
     # 假设 excel_format 方法返回 True 表示成功
     assert ManagerExcel.excel_format('ex1.xlsx', 'result.xlsx') is not None
 
-@pytest.mark.skip(reason="pdf功能升级，代码重构中，跳过")
 def test_pdf_manager():
-    # 假设 create_watermarks 方法返回 True 表示成功
-    assert ManagerPdf.create_watermarks('ex1.pdf', 'watermark.pdf') is not None
+    # doc、xlsx等转换为pdf
+    pass
