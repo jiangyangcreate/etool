@@ -3,7 +3,6 @@ from datetime import datetime
 from typing import Callable, Union, List, Dict, Optional
 import schedule
 
-
 class ManagerScheduler:
     @staticmethod
     def pocwatch(

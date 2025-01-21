@@ -153,13 +153,12 @@ def video_feed():
     response.headers['Pragma'] = 'no-cache'
     return response
 
-
 def screen_share(port=8901):
     app.run(threaded=True, host='0.0.0.0', port=port,debug=True)
 
 
 def share_file(port=8902):
-    app = Flask(__name__)
+    app_share_file = Flask(__name__)
 
     # 设置桌面路径和文件夹名称
     desktop_path = os.path.join(os.path.expanduser("~"), "Desktop")
@@ -186,7 +185,7 @@ def share_file(port=8902):
     </ul>
     '''
 
-    @app.route('/', methods=['GET', 'POST'])
+    @app_share_file.route('/', methods=['GET', 'POST'])
     def upload_file():
         if request.method == 'POST':
             # 获取上传的文件
@@ -198,18 +197,17 @@ def share_file(port=8902):
         files = os.listdir(etool_folder)
         return render_template_string(index_template, files=files)
 
-    @app.route('/uploads/<filename>')
+    @app_share_file.route('/uploads/<filename>')
     def download_file(filename):
         return send_from_directory(etool_folder, filename)
 
-    app.run(host='0.0.0.0', port=port)
+    app_share_file.run(host='0.0.0.0', port=port)
 
 class ManagerShare:
     @staticmethod
     def screen_share(port=8901):
-        app.run(threaded=True, host='0.0.0.0', port=port,debug=True)
+        screen_share(port)
 
     @staticmethod
     def share_file(port=8902):
-        app.run(host='0.0.0.0', port=port)
-
+        share_file(port)
