@@ -1,85 +1,86 @@
-# 安装
+# [中文](README_CN.md) | English
 
-使用 pip 安装 etool:
+# Installation
+
+Install etool using pip:
 
 ```bash
 pip install -U etool
 ```
 
-# 功能与使用示例
+# Features and Usage Examples
 
-## 网络
+## Network
 
-### 测试网络速度
+### Test Network Speed
 
 ```python
 from etool import ManagerSpeed
-ManagerSpeed.network() # 网络测试
-ManagerSpeed.disk() # 硬盘测试
-ManagerSpeed.memory() # 内存测试
-ManagerSpeed.gpu_memory() # GPU测试
+ManagerSpeed.network() # Network test
+ManagerSpeed.disk() # Disk test
+ManagerSpeed.memory() # Memory test
+ManagerSpeed.gpu_memory() # GPU test
 ```
 
-## 屏幕与文件分享
+## Screen and File Sharing
 
-### 分享屏幕
+### Share Screen
 
 ```python
 from etool import ManagerShare
-ManagerShare.screen_share() # 分享屏幕
+ManagerShare.screen_share() # Share screen
 ```
 
-### 分享文件
+### Share File
 
 ```python
 from etool import ManagerShare
-ManagerShare.share_file() # 分享文件
+ManagerShare.share_file() # Share file
 ```
 
-## 办公
+## Office
 
-### PDF处理
+### PDF Processing
 
 ```python
 from etool import ManagerPdf
 
-# doc、xlsx等转换为pdf(转换一个)
+# Convert doc, xlsx, etc. to pdf (convert one file)
 ManagerPdf.pdfconverter(os.path.join(os.path.dirname(__file__),'pdf','ex1.docx'),os.path.join(os.path.dirname(__file__),'pdf_out'))
-# doc、xlsx等转换为pdf(转换一个目录下的所有文件)
+# Convert doc, xlsx, etc. to pdf (convert all files in a directory)
 ManagerPdf.pdfconverter(os.path.join(os.path.dirname(__file__),'pdf'),os.path.join(os.path.dirname(__file__),'pdf_out'))
 
-# 给pdf文件添加水印（一个文件）
+# Add watermark to pdf files (one file)
 ManagerPdf.create_watermarks(os.path.join(os.path.dirname(__file__),'pdf_out','ex1.pdf'),os.path.join(os.path.dirname(__file__),'pdf_out','watermarks.pdf'),os.path.join(os.path.dirname(__file__),'pdf_out_watermark'))
-# 给pdf文件添加水印（一个目录下的所有文件）
+# Add watermark to pdf files (all files in a directory)
 ManagerPdf.create_watermarks(os.path.join(os.path.dirname(__file__),'pdf_out'),os.path.join(os.path.dirname(__file__),'pdf_out','watermarks.pdf'),os.path.join(os.path.dirname(__file__),'pdf_out_watermark'))
 
-
-# 加密pdf文件
+# Encrypt pdf files
 ManagerPdf.encrypt_pdf(os.path.join(os.path.dirname(__file__),'pdf_out','ex1.pdf'),r"1234567890")
-# 解密pdf文件
+# Decrypt pdf files
 ManagerPdf.decrypt_pdf(os.path.join(os.path.dirname(__file__),'pdf_out','ex1_encrypted.pdf'),r"1234567890")
 
-# 拆分pdf文件（按页数）每3页一份
+# Split pdf files (by pages) every 3 pages
 ManagerPdf.split_by_pages(os.path.join(os.path.dirname(__file__),'pdf_out','merged.pdf'),3)
-# 拆分pdf文件（按份数）生成2份
+# Split pdf files (by number) into 2 parts
 ManagerPdf.split_by_num(os.path.join(os.path.dirname(__file__),'pdf_out','merged.pdf'),2)
 
-# 将pdf ex2插入到pdf ex1的指定页后
+# Insert pdf ex2 into a specific page of pdf ex1
 ManagerPdf.insert_pdf(os.path.join(os.path.dirname(__file__),'pdf_out','ex1.pdf'),os.path.join(os.path.dirname(__file__),'pdf_out','ex2.pdf'),0,os.path.join(os.path.dirname(__file__),'pdf_out','pdf_insert.pdf'))
 ```
 
-### docx处理
+### docx Processing
 
 ```python
 from etool import ManagerDocx
-word_path = 'ex1.docx' # docx文件路径
-result_path = 'result' # 保存路径
-ManagerDocx.replace_words(word_path, '1', '2') # 替换文档中的文字
-ManagerDocx.change_forward(word_path, 'result.docx') # 更改文档格式
-ManagerDocx.get_pictures(word_path, result_path) # 提取docx中的图片至result文件夹
+word_path = 'ex1.docx' # docx file path
+result_path = 'result' # save path
+ManagerDocx.replace_words(word_path, '1', '2') # Replace text in document
+ManagerDocx.change_forward(word_path, 'result.docx') # Change document format
+ManagerDocx.get_pictures(word_path, result_path) # Extract images from docx to result folder
 ```
 
-### 邮件发送
+### Email Sending
 
 ```python
 from etool import ManagerEmail
@@ -87,58 +88,58 @@ ManagerEmail.send_email(
     sender='1234567890@qq.com',
     password='1234567890',
     recipient='1234567890@qq.com',
-    subject='测试邮件',
-    message='测试邮件内容',
+    subject='Test Email',
+    message='Test email content',
     file_path='test.txt',
     image_path='test.webp'
-) # 发送邮件
+) # Send email
 ```
 
-### 图片处理
+### Image Processing
 
 ```python
 from etool import ManagerImage
-pics = ['pic1.webp', 'pic2.webp'] # 图片路径列表
-ManagerImage.merge_LR(pics) # 左右拼接
-ManagerImage.merge_UD(pics) # 上下拼接
-ManagerImage.fill_image('pic1_UD.webp') # 填充图片
-ManagerImage.cut_image('pic1_UD_fill.webp') # 裁剪图片
-ManagerImage.rename_images('tests', remove=True) # 重命名图片
+pics = ['pic1.webp', 'pic2.webp'] # List of image paths
+ManagerImage.merge_LR(pics) # Merge left and right
+ManagerImage.merge_UD(pics) # Merge up and down
+ManagerImage.fill_image('pic1_UD.webp') # Fill image
+ManagerImage.cut_image('pic1_UD_fill.webp') # Cut image
+ManagerImage.rename_images('tests', remove=True) # Rename images
 ```
 
-### 表格处理
+### Excel Processing
 
 ```python
 from etool import ManagerExcel
-excel_path = 'ex1.xlsx' # excel文件路径
-save_path = 'result.xlsx' # 保存路径
-ManagerExcel.excel_format(excel_path, save_path) # 复制ex1.xlsx的样式到result.xlsx
+excel_path = 'ex1.xlsx' # Excel file path
+save_path = 'result.xlsx' # Save path
+ManagerExcel.excel_format(excel_path, save_path) # Copy style from ex1.xlsx to result.xlsx
 ```
 
-### 二维码生成
+### QR Code Generation
 
 ```python
 from etool import ManagerQrcode
-qr_path = 'qr.png' # 保存路径
-ManagerQrcode.generate_english_qrcode(words='https://www.baidu.com', qr_path) # 生成不含中文的二维码
-ManagerQrcode.generate_qrcode(words='百度', qr_path) # 生成含中文的二维码
-ManagerQrcode.decode_qrcode(qr_path) # 解码二维码
+qr_path = 'qr.png' # Save path
+ManagerQrcode.generate_english_qrcode(words='https://www.baidu.com', qr_path) # Generate QR code without Chinese
+ManagerQrcode.generate_qrcode(words='百度', qr_path) # Generate QR code with Chinese
+ManagerQrcode.decode_qrcode(qr_path) # Decode QR code
 ```
 
-### ipynb转换
+### ipynb Conversion
 
 ```python
 from etool import ManagerIpynb
-ipynb_dir = 'ipynb_dir' # ipynb文件夹路径
-md_dir = 'md' # md文件夹路径
+ipynb_dir = 'ipynb_dir' # ipynb directory path
+md_dir = 'md' # md directory path
 
-ManagerIpynb.merge_notebooks(ipynb_dir) # 合并ipynb文件
-ManagerIpynb.convert_notebook_to_markdown(ipynb_dir+'.ipynb', md_dir) # 将ipynb文件转换为md文件
+ManagerIpynb.merge_notebooks(ipynb_dir) # Merge ipynb files
+ManagerIpynb.convert_notebook_to_markdown(ipynb_dir+'.ipynb', md_dir) # Convert ipynb files to md files
 ```
 
-## 其他
+## Others
 
-### 任务调度
+### Task Scheduling
 
 ```python
 from etool import ManagerScheduler
@@ -155,26 +156,26 @@ def func_failure():
 
 ManagerScheduler.pocwatch(job, 2, func_success, func_failure)
 """
-- `job`: 任务函数
-- `schedule_time`: 执行时间
-- `func_success`: 任务成功时的回调函数
-- `func_failure`: 任务失败时的回调函数
+- `job`: Task function
+- `schedule_time`: Execution time
+- `func_success`: Callback function on task success
+- `func_failure`: Callback function on task failure
 
-`schedule_time`的格式如下：
+`schedule_time` format:
 
-如果是数字则默认单位是秒，每间隔`schedule_time`秒执行一次，例如`120`，则每2分钟执行一次。
+If it's a number, the default unit is seconds, executed every `schedule_time` seconds, e.g., `120` means every 2 minutes.
 
-如果是字符串则默认是时间点，请遵从`HH:MM`的格式，例如`08:00`，每天在这个时间点执行一次。
+If it's a string, the default is a time point, follow the `HH:MM` format, e.g., `08:00`, executed once daily at this time.
 
-如果是列表，则默认是多个时间点，例如`["08:00", "12:00", "16:00"]`，每天在这些时间点执行一次。
+If it's a list, the default is multiple time points, e.g., `["08:00", "12:00", "16:00"]`, executed daily at these times.
 
-如果传入的是字典，则解析字典的键：
+If a dictionary is passed, parse the dictionary keys:
 
-如果字典的键为数字，则默认是日期，对应字典的值遵从上方数字、字符串、列表的判断。
+If the key is a number, the default is a date, the corresponding value follows the above number, string, list judgment.
 
-如果字典的键为字符串，则默认是星期几（以周一为例，支持的写法包括：`1`、`monday`、`Monday`、`MONDAY`、`mon`、`mon.`、`m`，以此类推），对应字典的值遵从上方数字、字符串、列表的判断。
+If the key is a string, the default is a weekday (e.g., Monday, supported formats include: `1`, `monday`, `Monday`, `MONDAY`, `mon`, `mon.`, `m`), the corresponding value follows the above number, string, list judgment.
 
-例如下面是1号的8点、2号的8点、12点、16点、3号每隔一个小时执行一次、每周一的8点执行一次。
+For example, the 1st at 8:00, the 2nd at 8:00, 12:00, 16:00, the 3rd every hour, every Monday at 8:00.
 
 schedule_time = {
 1: "08:00",
@@ -184,7 +185,7 @@ schedule_time = {
 }
 
 """
-# 如果你不确定调度时间，可以先使用parse_schedule_time函数，确认一下
+# If you're unsure about the schedule time, use the parse_schedule_time function to confirm
 ManagerScheduler.parse_schedule_time(120)
 ManagerScheduler.parse_schedule_time("08:00")
 ManagerScheduler.parse_schedule_time(["08:00", "12:00", "16:00"])
@@ -192,13 +193,12 @@ ManagerScheduler.parse_schedule_time({1: "08:00", 2: ["08:00", "12:00", "16:00"]
 
 ```
 
-### 密码生成
+### Password Generation
 
 ```python
 from etool import ManagerPassword
 print(ManagerPassword.generate_pwd_list(ManagerPassword.results['all_letters'] + ManagerPassword.results['digits'], 2))
-# 生成2位密码的所有可能（可用于密码爆破）
+# Generate all possible 2-digit passwords (for password cracking)
 print(ManagerPassword.random_pwd(8))
-# 随机生成8位密码（随机加密）
+# Randomly generate an 8-digit password (random encryption)
 ```
-
