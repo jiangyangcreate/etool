@@ -113,31 +113,26 @@ class ManagerSpeed:
     def memory(cls, size_mb=1000):
         """测试内存读写速度"""
         try:
-            # 写入测试
+            num_elements = size_mb * 1024 * 1024 // 8  # 计算双精度浮点数数量
+            # 写入测试（包含NumPy高效生成数据的时间）
             start_time = time.time()
-            data = [random.random() for _ in range(size_mb * 1024 * 1024 // 8)]  # 创建指定大小的列表
+            data = np.random.rand(num_elements)
             write_time = time.time() - start_time
             write_speed = size_mb / write_time
-            
-            # 读取测试
+
+            # 读取测试（强制读取数据）
             start_time = time.time()
-            _ = [x for x in data]  # 遍历列表
+            _ = np.sum(data)  # 确保数据被读取
             read_time = time.time() - start_time
             read_speed = size_mb / read_time
-            
-            cls.results['memory'] = {
-                'read_speed': f"{read_speed:.2f} MB/s",
-                'write_speed': f"{write_speed:.2f} MB/s"
-            }
+
+            # 存储结果...
             info = f'''\n内存测试结果:
-读取速度: {cls.results['memory']['read_speed']}
-写入速度: {cls.results['memory']['write_speed']}
-'''
+读取速度: {read_speed:.2f} MB/s
+写入速度: {write_speed:.2f} MB/s'''
             print(info)
-            return info
+
         except Exception as e:
-            print(f"内存测试失败: {str(e)}")
-            cls.results['memory'] = None
             return f"内存测试失败: {str(e)}"
 
     @classmethod
