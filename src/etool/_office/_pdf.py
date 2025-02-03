@@ -8,7 +8,6 @@ import time
 import ctypes
 from ctypes import wintypes
 from pdf2docx import Converter
-# 定义类
 
 
 class PDFConverter:

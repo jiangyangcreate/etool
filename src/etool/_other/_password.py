@@ -3,36 +3,39 @@ import itertools
 import random
 class ManagerPassword:
     results = {
-                'all_letters': string.ascii_letters, # 所有字母
-                'upper_letters': string.ascii_uppercase, # 大写字母
-                'lower_letters': string.ascii_lowercase, # 小写字母
-                'digits': string.digits, # 数字
-                'punctuation': string.punctuation, # 标点符号
-                'printable': string.printable, # 可打印字符
-                'whitespace': string.whitespace, # 空白字符
+                'all_letters': string.ascii_letters, # All letters
+                'upper_letters': string.ascii_uppercase, # Upper letters
+                'lower_letters': string.ascii_lowercase, # Lower letters
+                'digits': string.digits, # Digits
+                'punctuation': string.punctuation, # Punctuation
+                'printable': string.printable, # Printable
+                'whitespace': string.whitespace, # Whitespace
             }
+
 
     @staticmethod
     def generate_pwd_list(dic, max_len):
         """
-        description:生成指定长度的密码序列
-        param {*} dic   字典
-        param {*} pwd_len   最大密码长度
-        return {*} 所有可能的密码
+        description:Generate a password sequence of a specified length
+        param {*} dic    Dictionary
+        param {*} pwd_len    Maximum password length
+        return {*} All possible passwords
         """
-        k = itertools.product(dic, repeat=max_len)  # 迭代器
+        k = itertools.product(dic, repeat=max_len)  # Iterator
         allkey = ("".join(i) for i in k)
         if max_len == 1:
+
             return list(allkey)
         return ManagerPassword.generate_pwd_list(dic, max_len - 1) + list(allkey)
     
     @staticmethod
     def random_pwd(pwd_len):
         """
-        随机生成密码
-        :param pwd_len: 密码长度
-        :return: 随机密码
+        Randomly generate a password
+        :param pwd_len: Password length
+        :return: Random password
         """
         characters = ManagerPassword.results['all_letters'] + ManagerPassword.results['digits'] + ManagerPassword.results['punctuation']
         return ''.join(random.choice(characters) for _ in range(pwd_len))
+
     

@@ -42,31 +42,35 @@ class ManagerEmail:
         smtp_ssl=True,
     ) -> str:
         """
-        :param sender: str 发件人
-        :param password: str 发件人密码
-        :param message: str 邮件内容
-        :param recipient: str 收件人
-        :param subject: str 邮件主题描述
-        :param sender_show: str 发件人显示，不起实际作用如："xxx"
-        :param recipient_show: str 收件人显示，不起实际作用 多个收件人用','隔开如："xxx,xxxx"
-        :param cc_show: str 抄送人显示，不起实际作用，多个抄送人用','隔开如："xxx,xxxx"
-        :param file_path: str 附件路径
-        :param image_path: str 图片路径
+        :param sender: str sender
+        :param password: str sender password
+        :param message: str message
+        :param recipient: str recipient
+        :param subject: str subject description
+        :param sender_show: str sender display, does not actually affect anything like: "xxx"
+        :param recipient_show: str recipient display, does not actually affect anything like: "xxx,xxxx"
+        :param cc_show: str cc display, does not actually affect anything, multiple cc separated by ',' like: "xxx,xxxx"
+        :param file_path: str file path
+        :param image_path: str image path
         """
-        # 填写真实的发邮件服务器用户名、密码
+        # fill in the real sender email and password
+
         if not recipient.endswith(","):
             recipient = recipient + ","
 
-        # 发送附件的方法定义为一个变量
+
+        # define the method of sending attachments as a variable
         msg = MIMEMultipart()
-        # 邮件内容
+        # email content
         content = (
             message + "<br><br>" + "来自 Allen 的 AI Agent 的邮件，有问题请联系我。"
         )
-        # 发送正文
+
+        # send content
         msg.attach(MIMEText(content, "html", "utf-8"))
-        # 调用传送附件模块，传送附件
+        # call the module of sending attachments, send attachments
         if file_path:
+
             if isinstance(file_path, str):
                 file_path = [file_path]
             for file_path in file_path:
@@ -78,10 +82,11 @@ class ManagerEmail:
                 else:
                     att['Content-Disposition'] = f'attachment; filename="{file_name}"'
                 msg.attach(att)
-        # 处理图片
+        # process images
         if image_path:
             if isinstance(image_path, str):
                 image_path = [image_path]
+
             mime_images = ''
             for i, img_path in enumerate(image_path, start=1):
                 mime_images += f'<p><img src="cid:imageid{i}" alt="imageid{i}"></p>'
@@ -95,14 +100,14 @@ class ManagerEmail:
 
 
         msg["Subject"] = subject if subject else "来自 AI 的邮件"
-        # 发件人显示，不起实际作用
+        # sender display, does not actually affect anything
         msg["from"] = sender_show if sender_show else sender
-        # 收件人显示，不起实际作用
+        # recipient display, does not actually affect anything
         msg["to"] = recipient_show if recipient_show else recipient
-        # 抄送人显示，不起实际作用
+        # cc display, does not actually affect anything
         msg["Cc"] = cc_show
 
-        # 循环这个列表，剔除空数据
+        # loop this list, remove empty data
         to_addrs = [addr for addr in recipient.split(",") if addr]
 
         host,port = ManagerEmail.email_providers.get(sender.split("@")[-1].lower(), ("smtp.exmail.qq.com", 465))
@@ -113,10 +118,11 @@ class ManagerEmail:
                 server = smtplib.SMTP(host, port)
                 server.starttls()
             server.login(sender, password)
-            server.sendmail(sender, recipient, msg.as_string())
+            server.sendmail(sender, to_addrs, msg.as_string())
             server.quit()
         except Exception as e:
             try:
+
                 if e.smtp_code != -1:
                     return f"send error.{e}"
                 else:

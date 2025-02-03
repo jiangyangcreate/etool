@@ -8,61 +8,72 @@ class ManagerDocx:
     @staticmethod
     def replace_words(path: str, old: str, new: str) -> None:
         """
-        替换Word文档中的关键词。
+        Replace keywords in a Word document.
 
-        :param path: 文件路径
-        :param old: 需要替换的关键词
-        :param new: 新的替换后的关键词
+
+        :param path: file path
+        :param old: keyword to replace
+        :param new: new keyword after replacement
         :return: None
         """
         if path.endswith(".docx"):
-            # 不支持读取doc格式的文件
+
+            # does not support reading doc format files
             doc = docx.Document(path)
             for paragraph in doc.paragraphs:
                 for run in paragraph.runs:
+
                     if run.text:
                         run.text = run.text.replace(old, new)
                 doc.save(path)
         else:
-            raise ValueError("只支持docx文件格式!")
+            raise ValueError("Only docx file format is supported!")
         return path
+
 
     @staticmethod
     def change_forward(word_path: str, save_path: str) -> None:
         """
-        更改Word文档的页面方向。
+        Change the page direction of a Word document.
 
-        :param word_path: Word文件路径
-        :param result_path: 结果文件路径
+
+        :param word_path: Word file path
+        :param save_path: result file path
         :return: None
         """
         doc = docx.Document(word_path)
         for section in doc.sections:
-            # 交替宽高
+
+            # alternate width and height
             section.page_width, section.page_height = section.page_height, section.page_width
-        # 保存为新文件
+        # save as a new file
         doc.save(save_path) 
         return save_path
+
 
     @staticmethod
     def get_pictures(word_path: str, result_path: str) -> str:
         """
-        从Word文档中提取图片并保存。
+        Extract images from a Word document and save them.
 
-        :param word_path: Word文件路径
-        :param result_path: 图片保存路径
-        :return: 图片保存路径
+
+        :param word_path: Word file path
+        :param result_path: image save path
+        :return: image save path
         """
-        # 创建保存路径
+        # create save path
         if not os.path.exists(result_path):
+
             os.makedirs(result_path)
-        # 读取文件
+        # read file
         doc = docx.Document(word_path)
 
-        # 获取图片
+
+        # get images
         dict_rel = doc.part._rels
         for rel in dict_rel:
             rel = dict_rel[rel]
+
             if "image" in rel.target_ref:            
                 img_name = re.findall("/(.*)", rel.target_ref)[0]
                 word_name = os.path.splitext(word_path)[0]
@@ -70,14 +81,16 @@ class ManagerDocx:
                     new_name = word_name.split('\\')[-1]
                 else:
                     new_name = word_name.split('/')[-1]
-                # cv2获取图片大小
+                # get image size with cv2
                 imgdata = np.frombuffer(rel.target_part.blob,np.uint8)
                 img_cv = cv2.imdecode(imgdata,cv2.IMREAD_ANYCOLOR)
                 img_name = '{}-{}-{}-{}'.format(new_name,img_cv.shape[0],img_cv.shape[1],img_name)
-                # 直接二进制写入兼容性比使用CV2的保存图片好
+
+                # write directly to binary for better compatibility than using CV2 to save images
                 with open(f'{result_path}/{img_name}','wb') as f:
                     f.write(rel.target_part.blob)
             else:
+
                 pass
         return result_path
     

@@ -98,16 +98,18 @@ class Camera(BaseCamera):
 
     @staticmethod
     def frames():
-        fps = 24  # 限制帧率
+        fps = 24  # Limit the frame rate
         frame_interval = 1.0 / fps
         while True:
             time.sleep(frame_interval - 0.001)
-            image = ImageGrab.grab()  # 获取屏幕数据
+
+            image = ImageGrab.grab()  # Get screen data
             # w, h = image.size
-            output_buffer = BytesIO()  # 创建二进制对象
-            image.save(output_buffer, format='JPEG', quality=100)  # quality提升图片分辨率
-            frame = output_buffer.getvalue()  # 获取二进制数据
-            yield frame  # 生成器返回一张图片的二进制数据
+            output_buffer = BytesIO()  # Create a binary object
+            image.save(output_buffer, format='JPEG', quality=100)  # quality improves image resolution
+            frame = output_buffer.getvalue()  # Get binary data
+            yield frame  # Generator returns binary data for one image
+
 
 app = Flask(__name__)
 
@@ -116,17 +118,18 @@ app = Flask(__name__)
 def index():
     return render_template_string('''<html>
 <head>
-    <title>屏幕共享</title>
+    <title>Screen Sharing</title>
     <script>
-        // 定期清理旧图片，防止内存占用过大
+
         function setupImageCleaning() {
             const img = document.querySelector('img');
             setInterval(() => {
                 img.src = img.src.split('?')[0] + '?t=' + new Date().getTime();
-            }, 5000); // 每5秒刷新一次
+            }, 5000); // Refresh every 5 seconds
         }
     </script>
 </head>
+
 <body>
     <img src="{{ url_for('video_feed') }}" onload="setupImageCleaning()">
 </body>
@@ -135,10 +138,11 @@ def index():
 
 def gen(camera):
     """
-    流媒体发生器
+    Stream media generator
     """
     while True:
         frame = camera.get_frame()
+
 
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
@@ -146,10 +150,11 @@ def gen(camera):
 
 @app.route('/video_feed')
 def video_feed():
-    """流媒体数据"""
+    """Stream media data"""
     response = Response(gen(Camera()),
                         mimetype='multipart/x-mixed-replace; boundary=frame')
     response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+
     response.headers['Pragma'] = 'no-cache'
     return response
 
@@ -160,26 +165,30 @@ def screen_share(port=8901):
 def share_file(port=8902):
     app_share_file = Flask(__name__)
 
-    # 设置桌面路径和文件夹名称
+    # Set the desktop path and folder name
     desktop_path = os.path.join(os.path.expanduser("~"), "Desktop")
     etool_folder = os.path.join(desktop_path, "etool")
 
-    # 如果文件夹不存在，则创建
+
+    # If the folder does not exist, create it
     if not os.path.exists(etool_folder):
         os.makedirs(etool_folder)
 
-    # 首页模板
+
+    # Home page template
     index_template = '''
     <!doctype html>
-    <title>eTool 文件上传</title>
-    <h1>上传新文件</h1>
+    <title>eTool File Upload</title>
+    <h1>Upload New File</h1>
     <form method=post enctype=multipart/form-data>
+
       <input type=file name=file>
-      <input type=submit value=上传>
+      <input type=submit value=Upload>
     </form>
-    <h2>文件列表</h2>
+    <h2>File List</h2>
     <ul>
     {% for filename in files %}
+
       <li><a href="{{ url_for('download_file', filename=filename) }}">{{ filename }}</a></li>
     {% endfor %}
     </ul>
@@ -188,14 +197,16 @@ def share_file(port=8902):
     @app_share_file.route('/', methods=['GET', 'POST'])
     def upload_file():
         if request.method == 'POST':
-            # 获取上传的文件
+            # Get the uploaded file
             file = request.files['file']
             if file:
-                # 保存文件到etool文件夹
+                # Save the file to the etool folder
+
                 file.save(os.path.join(etool_folder, file.filename))
-        # 获取文件夹中的文件列表
+        # Get the file list in the folder
         files = os.listdir(etool_folder)
         return render_template_string(index_template, files=files)
+
 
     @app_share_file.route('/uploads/<filename>')
     def download_file(filename):

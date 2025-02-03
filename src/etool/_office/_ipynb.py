@@ -6,12 +6,14 @@ class ManagerIpynb:
     @staticmethod
     def merge_notebooks(directory_path: str) -> str:
         """
-        合并多个ipynb文件到一个文件中。
+        Merge multiple ipynb files into a single file.
         
-        :param directory_path: 包含ipynb文件的文件夹路径
-        :return: 合并后的ipynb文件路径
+
+        :param directory_path: The path to the folder containing the ipynb files
+        :return: The path to the merged ipynb file
         """
         if not directory_path.endswith("/"):
+
             directory_path += "/"
         base_path: str = directory_path.rstrip("/")
 
@@ -35,12 +37,13 @@ class ManagerIpynb:
     @staticmethod
     def convert_notebook_to_markdown(notebook_path: str, output_directory: str = "") -> str:
         """
-        将ipynb文件转换为Markdown格式并保存。
+        Convert an ipynb file to Markdown format and save it.
         
-        :param notebook_path: ipynb文件路径
-        :param output_directory: 保存Markdown文件的目录
-        :return: 保存的Markdown文件路径
+        :param notebook_path: The path to the ipynb file
+        :param output_directory: The directory to save the Markdown file
+        :return: The path to the saved Markdown file
         """
+
         markdown_file_name: str = os.path.join(output_directory, notebook_path.replace(".ipynb", ".md"))
 
         try:

@@ -8,38 +8,42 @@ class ManagerScheduler:
     @staticmethod
     def parse_schedule_time(schedule_time):
         """
-        解析调度时间
+        Parse the schedule time.
 
-        :param schedule_time: 调度时间
+        :param schedule_time: The schedule time
 
         test:
         parse_schedule_time(120)
         parse_schedule_time("08:00")
         parse_schedule_time(["08:00", "12:00", "16:00"])
+
         parse_schedule_time({1: "08:00", 2: ["08:00", "12:00", "16:00"], 3: 216000, "1": "08:00"})
         """
         if isinstance(schedule_time, int):
-            # 处理秒数间隔
-            print(f"每 {schedule_time} 秒执行一次")
+            # Handle the number of seconds interval
+            print(f"Execute every {schedule_time} seconds")
         elif isinstance(schedule_time, str):
-            # 处理时间点
-            print(f"每天在 {schedule_time} 执行一次")
+            # Handle the time point
+            print(f"Execute every {schedule_time}")
         elif isinstance(schedule_time, list):
-            # 处理多个时间点
+            # Handle multiple time points
             for time in schedule_time:
-                print(f"每天在 {time} 执行一次")
+                print(f"Execute every {time} seconds")
         elif isinstance(schedule_time, dict):
+
             for key, value in schedule_time.items():
                 if isinstance(key, int):
-                    # 处理特定日期
-                    print(f"本月 {key} 号：")
+                    # Handle specific date
+                    print(f"This month {key} day:")
                     ManagerScheduler.parse_schedule_time(value)
                 elif isinstance(key, str):
-                    # 处理星期几
-                    print(f"每周 周{key} 的调度：")
+                    # Handle weekday
+
+                    print(f"The schedule for the week {key}:")
                     ManagerScheduler.parse_schedule_time(value)
         else:
-            print("无效的调度格式")
+            raise ValueError("Invalid schedule_time type.")
+
     @staticmethod
     def pocwatch(
         job: Callable,
@@ -47,31 +51,6 @@ class ManagerScheduler:
         success_function: Callable,
         failure_function: Callable,
     ) -> None:
-        """
-        - `schedule_time`: 执行时间
-
-        如果是数字则默认单位是秒，每间隔`schedule_time`秒执行一次，例如`120`，则每2分钟执行一次。
-
-        如果是字符串则默认是时间点，请遵从`HH:MM`的格式，例如`08:00`，每天在这个时间点执行一次。
-
-        如果是列表，则默认是多个时间点，例如`["08:00", "12:00", "16:00"]`，每天在这些时间点执行一次。
-
-        如果传入的是字典，则解析字典的键：
-
-        如果字典的键为数字，则默认是日期，对应字典的值遵从上方数字、字符串、列表的判断。
-
-        如果字典的键为字符串，则默认是星期几（以周一为例，支持的写法包括：`1`、`monday`、`Monday`、`MONDAY`、`mon`、`mon.`、`m`，以此类推），对应字典的值遵从上方数字、字符串、列表的判断。
-
-        例如下面是1号的8点、2号的8点、12点、16点、3号每隔一个小时执行一次、每周一的8点执行一次。
-
-        schedule_time = {
-            1: "08:00",
-            2: ["08:00", "12:00", "16:00"],
-            3: 216000,
-            "1": "08:00",
-        }
-        """
-
         def wrapper():
             try:
                 job()

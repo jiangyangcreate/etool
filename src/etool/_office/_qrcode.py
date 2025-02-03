@@ -6,23 +6,25 @@ class ManagerQrcode:
     @staticmethod
     def decode_qrcode(path):
         """
-        解析二维码
-        :param path: 图片路径
-        :return: 解析后的地址
+        Decode a QR code
+        :param path: The path to the image
+        :return: The decoded address
         """
         url = qr.upload(path)
         url = qr.online(url)
         return url
+
     
     @staticmethod
     def generate_english_qrcode(words, save_path):
         """
-        生成英文内容的二维码
-        :param words: 二维码内容
-        :param save_path: 保存路径
-        :return: 二维码路径
+        Generate a QR code for English content
+        :param words: The content of the QR code
+        :param save_path: The path to save the QR code
+        :return: The path to the QR code
         """
         try:
+
             myqr.run(
                 words=words,
                 save_name=save_path
@@ -35,12 +37,13 @@ class ManagerQrcode:
     @staticmethod
     def generate_qrcode(path, save_path):
         """
-        生成二维码
-        :param path: 二维码内容
-        :param save_path: 保存路径
-        :return: 二维码路径
+        Generate a QR code
+        :param path: The content of the QR code
+        :param save_path: The path to save the QR code
+        :return: The path to the QR code
         """
         img = qrcode.make(path)
         img.save(save_path)
         return save_path
+
 
