@@ -131,6 +131,7 @@ class ManagerSpeed:
 读取速度: {read_speed:.2f} MB/s
 写入速度: {write_speed:.2f} MB/s'''
             print(info)
+            return info
 
         except Exception as e:
             return f"内存测试失败: {str(e)}"
@@ -198,5 +199,3 @@ GPU使用率: {gpu['gpu_utilization']}
             print(f"GPU测试失败: {str(e)}")
             cls.results['gpu'] = None
             return f"GPU测试失败: {str(e)}"
-
-
