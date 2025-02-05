@@ -202,3 +202,14 @@ print(ManagerPassword.generate_pwd_list(ManagerPassword.results['all_letters'] +
 print(ManagerPassword.random_pwd(8))
 # Randomly generate an 8-digit password (random encryption)
 ```
+
+### Install Dependencies
+
+```python
+from etool import ManagerInstall
+ManagerInstall.install(requirements_file="requirements.txt", failed_file="failed_requirements.txt", retry=2)
+# Automatically install dependencies, retry 2 times if installation fails, skip installation if successful. The above are default parameters.
+# You can also use the default parameters without specifying parameters.    
+ManagerInstall.install()
+```
+

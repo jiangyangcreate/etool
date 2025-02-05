@@ -204,3 +204,14 @@ print(ManagerPassword.random_pwd(8))
 # 随机生成8位密码（随机加密）
 ```
 
+### 安装依赖
+
+```bash
+from etool import ManagerInstall
+ManagerInstall.install(requirements_file="requirements.txt", failed_file="failed_requirements.txt", retry=2)
+# 自动安装依赖，如果安装失败，则重试2次, 如果安装成功，则跳过安装.以上为默认缺省参数
+# 你也可以不指定参数，使用默认参数
+ManagerInstall.install()
+```
+
+
