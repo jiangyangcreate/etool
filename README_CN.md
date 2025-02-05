@@ -214,4 +214,12 @@ ManagerInstall.install(requirements_file="requirements.txt", failed_file="failed
 ManagerInstall.install()
 ```
 
+### 管理windows右键菜单
 
+```python
+from etool import ManagerMenu
+ManagerMenu.switch_to_classic_menu() # 切换到Windows 11经典右键菜单
+ManagerMenu.switch_to_new_menu() # 切换到Windows 11新版右键菜单
+ManagerMenu.add_cursor_context_menu() # 添加Cursor到Windows右键菜单
+ManagerMenu.remove_cursor_context_menu() # 移除Cursor从Windows右键菜单
+```

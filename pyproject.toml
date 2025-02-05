@@ -4,10 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "etool"
-version = "1.4.1"
+version = "1.4.1a"
 authors = [
   { name="Allen", email="jiangyangcreate@gmail.com" },
 ]
+
 description = "A etool package for security monitoring"
 readme = "README.md"
 requires-python = ">=3.6"

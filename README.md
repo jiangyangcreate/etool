@@ -213,3 +213,12 @@ ManagerInstall.install(requirements_file="requirements.txt", failed_file="failed
 ManagerInstall.install()
 ```
 
+### Manage Windows Right-Click Menu
+
+```python
+from etool import ManagerMenu
+ManagerMenu.switch_to_classic_menu() # Switch to Windows 11 classic right-click menu
+ManagerMenu.switch_to_new_menu() # Switch to Windows 11 new right-click menu
+ManagerMenu.add_cursor_context_menu() # Add Cursor to Windows right-click menu
+ManagerMenu.remove_cursor_context_menu() # Remove Cursor from Windows right-click menu
+```

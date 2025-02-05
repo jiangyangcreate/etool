@@ -4,6 +4,7 @@ from ._network._share import ManagerShare
 from ._other._password import ManagerPassword
 from ._other._scheduler import ManagerScheduler
 from ._other._install import ManagerInstall
+from ._other._menu import ManagerMenu
 
 from ._office._image import ManagerImage
 from ._office._email import ManagerEmail
@@ -19,6 +20,7 @@ __all__ = [
     "ManagerPassword",
     "ManagerScheduler",
     "ManagerInstall",
+    "ManagerMenu",
     "ManagerImage",
     "ManagerEmail",
     "ManagerDocx",
