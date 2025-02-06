@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "etool"
-version = "1.4.1a"
+version = "1.4.1b"
 authors = [
   { name="Allen", email="jiangyangcreate@gmail.com" },
 ]
@@ -19,7 +19,7 @@ classifiers = [
 ]
 dependencies = [
     "schedule>=1.1.0",
-    "speedtest-cli>=2.1.3",
+    "speedtest-cli",
     "pynvml>=11.4.1",
     "flask",
     "pillow",

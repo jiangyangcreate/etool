@@ -12,7 +12,7 @@ class ManagerSpeed:
     def network(cls):
         """Test network speed"""
         try:
-            st = speedtest.Speedtest()
+            st = speedtest.Speedtest(secure=True, source_address=None)
             st.get_best_server()
 
             download_speed = st.download() / 1_000_000
