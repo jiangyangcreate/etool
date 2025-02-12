@@ -193,7 +193,7 @@ ManagerScheduler.parse_schedule_time({1: "08:00", 2: ["08:00", "12:00", "16:00"]
 
 ```
 
-### Password Generation
+### Password Generation and Base Conversion
 
 ```python
 from etool import ManagerPassword
@@ -201,6 +201,13 @@ print(ManagerPassword.generate_pwd_list(ManagerPassword.results['all_letters'] +
 # Generate all possible 2-digit passwords (for password cracking)
 print(ManagerPassword.random_pwd(8))
 # Randomly generate an 8-digit password (random encryption)
+
+print(ManagerPassword.convert_base("A1F", 16, 2))
+# Convert 16-digit to 2-digit
+print(ManagerPassword.convert_base("-1101", 2, 16))
+# Convert 2-digit to 16-digit
+print(ManagerPassword.convert_base("Z", 36, 10))
+# Convert 36-digit to 10-digit
 ```
 
 ### Install Dependencies

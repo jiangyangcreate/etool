@@ -194,7 +194,7 @@ ManagerScheduler.parse_schedule_time({1: "08:00", 2: ["08:00", "12:00", "16:00"]
 
 ```
 
-### 密码生成
+### 密码生成与进制转换
 
 ```python
 from etool import ManagerPassword
@@ -202,6 +202,13 @@ print(ManagerPassword.generate_pwd_list(ManagerPassword.results['all_letters'] +
 # 生成2位密码的所有可能（可用于密码爆破）
 print(ManagerPassword.random_pwd(8))
 # 随机生成8位密码（随机加密）
+
+print(ManagerPassword.convert_base("A1F", 16, 2))
+# 将16进制转换为2进制
+print(ManagerPassword.convert_base("-1101", 2, 16))
+# 将2进制转换为16进制
+print(ManagerPassword.convert_base("Z", 36, 10))
+# 将36进制转换为10进制
 ```
 
 ### 安装依赖

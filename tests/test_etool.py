@@ -87,6 +87,12 @@ def test_password_manager():
     assert len(ManagerPassword.random_pwd(8)) == 8
 
 
+def test_password_manager_convert_base():
+    assert ManagerPassword.convert_base("A1F", 16, 2) == "101000011111"
+    assert ManagerPassword.convert_base("-1101", 2, 16) == "-D"
+    assert ManagerPassword.convert_base("Z", 36, 10) == "35"
+
+
 def test_qrcode_manager():
     # 假设 gen_en_qrcode 和 gen_qrcode 方法返回生成的二维码路径
     assert (
