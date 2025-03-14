@@ -35,7 +35,9 @@ dependencies = [
     "scikit-image",
     "pywin32",
     "pdf2docx",
-    "etool"
+    "etool",
+    "markdown",
+    "beautifulsoup4"
 ]
 
 [project.urls]

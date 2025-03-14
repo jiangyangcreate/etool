@@ -138,6 +138,21 @@ ManagerIpynb.merge_notebooks(ipynb_dir) # 合并ipynb文件
 ManagerIpynb.convert_notebook_to_markdown(ipynb_dir+'.ipynb', md_dir) # 将ipynb文件转换为md文件
 ```
 
+## Markdown处理
+
+```python
+from etool import ManagerMd
+
+# 将Markdown转换为Word文档
+ManagerMd.convert_md_to_docx("document.md", "document.docx")
+
+# 将Markdown转换为HTML网页
+ManagerMd.convert_md_to_html("document.md", "document.html")
+
+# 从Markdown提取表格到Excel
+ManagerMd.extract_tables_to_excel("document.md", "tables.xlsx")
+```
+
 ## 其他
 
 ### 任务调度
@@ -191,7 +206,6 @@ ManagerScheduler.parse_schedule_time(120)
 ManagerScheduler.parse_schedule_time("08:00")
 ManagerScheduler.parse_schedule_time(["08:00", "12:00", "16:00"])
 ManagerScheduler.parse_schedule_time({1: "08:00", 2: ["08:00", "12:00", "16:00"], 3: 216000, "1": "08:00"})
-
 ```
 
 ### 密码生成与进制转换

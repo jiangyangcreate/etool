@@ -137,6 +137,21 @@ ManagerIpynb.merge_notebooks(ipynb_dir) # Merge ipynb files
 ManagerIpynb.convert_notebook_to_markdown(ipynb_dir+'.ipynb', md_dir) # Convert ipynb files to md files
 ```
 
+## Markdown Processing
+
+```python
+from etool import ManagerMd
+
+# Convert Markdown to Word document
+ManagerMd.convert_md_to_docx("document.md", "document.docx")
+
+# Convert Markdown to HTML webpage
+ManagerMd.convert_md_to_html("document.md", "document.html")
+
+# Extract tables from Markdown to Excel
+ManagerMd.extract_tables_to_excel("document.md", "tables.xlsx")
+```
+
 ## Others
 
 ### Task Scheduling
@@ -216,7 +231,7 @@ print(ManagerPassword.convert_base("Z", 36, 10))
 from etool import ManagerInstall
 ManagerInstall.install(requirements_file="requirements.txt", failed_file="failed_requirements.txt", retry=2)
 # Automatically install dependencies, retry 2 times if installation fails, skip installation if successful. The above are default parameters.
-# You can also use the default parameters without specifying parameters.    
+# You can also use the default parameters without specifying parameters.  
 ManagerInstall.install()
 ```
 

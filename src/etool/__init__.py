@@ -13,6 +13,7 @@ from ._office._excel import ManagerExcel
 from ._office._ipynb import ManagerIpynb
 from ._office._qrcode import ManagerQrcode
 from ._office._pdf import ManagerPdf
+from ._md._md_to_docx import ManagerMd
 
 __all__ = [
     "ManagerSpeed",
@@ -28,4 +29,5 @@ __all__ = [
     "ManagerIpynb",
     "ManagerQrcode",
     "ManagerPdf",
+    "ManagerMd",
 ]

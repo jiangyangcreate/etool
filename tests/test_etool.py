@@ -118,6 +118,17 @@ def test_docx_manager():
     assert ManagerDocx.get_pictures("ex1.docx", "result") is not None
 
 
+def test_md_docx_manager():
+    # 测试Markdown转换为Word文档功能
+    assert ManagerMd.convert_md_to_docx("test.md", "test.docx") is not None
+    
+    # 测试Markdown转换为HTML网页功能
+    assert ManagerMd.convert_md_to_html("test.md", "test.html") is not None
+    
+    # 测试从Markdown提取表格到Excel功能
+    assert ManagerMd.extract_tables_to_excel("test.md", "test.xlsx") is not None
+
+
 def test_excel_manager():
     # 假设 excel_format 方法返回 True 表示成功
     assert ManagerExcel.excel_format("ex1.xlsx", "result.xlsx") is not None
