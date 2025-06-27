@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "etool"
-version = "1.4.2"
+version = "1.4.3"
 authors = [
   { name="Allen", email="jiangyangcreate@gmail.com" },
 ]
@@ -20,7 +20,6 @@ classifiers = [
 dependencies = [
     "schedule>=1.1.0",
     "speedtest-cli",
-    "pynvml>=11.4.1",
     "flask",
     "pillow",
     "pypdf",
@@ -33,7 +32,6 @@ dependencies = [
     "MyQR",
     "qrcode",
     "scikit-image",
-    "pywin32",
     "pdf2docx",
     "etool",
     "markdown",

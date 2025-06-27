@@ -2,7 +2,10 @@ import speedtest
 import time
 import os
 import tempfile
-import pynvml
+try:
+    import pynvml
+except ImportError:
+    print("Warning: pynvml not available, GPU monitoring features disabled")
 import numpy as np
 from numba import cuda
 
