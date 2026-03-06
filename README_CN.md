@@ -68,6 +68,11 @@ ManagerPdf.split_by_num(os.path.join(os.path.dirname(__file__),'pdf_out','merged
 
 # 将pdf ex2插入到pdf ex1的指定页后
 ManagerPdf.insert_pdf(os.path.join(os.path.dirname(__file__),'pdf_out','ex1.pdf'),os.path.join(os.path.dirname(__file__),'pdf_out','ex2.pdf'),0,os.path.join(os.path.dirname(__file__),'pdf_out','pdf_insert.pdf'))
+
+# PDF转图片（转换单个文件）
+ManagerPdf.pdf_to_images('document.pdf', output_dir='pdf_images')
+# PDF转图片（转换一个目录下的所有文件）
+ManagerPdf.pdf_to_images('pdf_folder', output_dir='pdf_images', dpi=2)
 ```
 
 ### docx处理

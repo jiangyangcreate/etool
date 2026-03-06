@@ -8,6 +8,8 @@ import time
 import ctypes
 from ctypes import wintypes
 from pdf2docx import Converter
+import fitz
+import sys
 
 
 class PDFConverter:
@@ -545,3 +547,82 @@ class ManagerPdf:
         with merged_name.open("wb") as f_out:
             writer.write(f_out)
         print(f"inserted file saved as: {merged_name}")
+
+    @staticmethod
+    def pdf_to_images(
+        pathname: str,
+        output_dir: str = "pdf_images",
+        dpi: int = 2,
+    ):
+        """
+        convert PDF files to PNG images
+        :param pathname: the path of the PDF file or folder
+        :param output_dir: the output directory for PNG images
+        :param dpi: the resolution multiplier (default 2.0 for high quality)
+        :return:
+        """
+        if sys.platform == "win32":
+            os.environ["PYTHONIOENCODING"] = "utf-8"
+
+        pathname = Path(pathname)
+        output_dir = Path(output_dir)
+        output_dir.mkdir(parents=True, exist_ok=True)
+
+        # determine if it is a file or a folder
+        if pathname.is_file():
+            if pathname.suffix.lower() == ".pdf":
+                pdf_files = [pathname]
+            else:
+                print(f"file {pathname} is not a valid PDF file!")
+                return
+        elif pathname.is_dir():
+            pdf_files = list(pathname.glob("*.pdf"))
+            if not pdf_files:
+                print(f"no PDF files found in folder: {pathname}")
+                return
+        else:
+            print(f"path {pathname} does not exist!")
+            return
+
+        print(f"found {len(pdf_files)} PDF file(s)")
+        print(f"output directory: {output_dir}")
+
+        success_count = 0
+        fail_count = 0
+
+        for pdf_file in pdf_files:
+            try:
+                print(f"\n{'=' * 60}")
+                print(f"processing: {pdf_file.name}")
+                print(f"{'=' * 60}")
+
+                doc = fitz.open(pdf_file)
+
+                for page_num in range(len(doc)):
+                    page = doc[page_num]
+
+                    mat = fitz.Matrix(dpi, dpi)
+                    pix = page.get_pixmap(matrix=mat)
+
+                    if len(doc) == 1:
+                        output_path = output_dir / f"{pdf_file.stem}.png"
+                    else:
+                        output_path = output_dir / f"{pdf_file.stem}_page_{page_num + 1}.png"
+
+                    pix.save(str(output_path))
+                    print(f"[OK] saved page {page_num + 1}/{len(doc)}: {output_path.name}")
+
+                doc.close()
+                success_count += 1
+
+            except Exception as e:
+                print(f"[ERROR] converting {pdf_file.name}: {e}")
+                fail_count += 1
+
+        print(f"\n{'=' * 60}")
+        print(f"conversion summary")
+        print(f"{'=' * 60}")
+        print(f"total files: {len(pdf_files)}")
+        print(f"successful: {success_count}")
+        print(f"failed: {fail_count}")
+        print(f"output location: {output_dir.resolve()}")

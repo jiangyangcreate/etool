@@ -28,6 +28,7 @@ dependencies = [
     "numba",
     "opencv-python-headless",
     "python-docx",
+    "pymupdf>=1.23.0",
     "easyqr",
     "MyQR",
     "qrcode",

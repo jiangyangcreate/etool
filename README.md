@@ -67,6 +67,11 @@ ManagerPdf.split_by_num(os.path.join(os.path.dirname(__file__),'pdf_out','merged
 
 # Insert pdf ex2 into a specific page of pdf ex1
 ManagerPdf.insert_pdf(os.path.join(os.path.dirname(__file__),'pdf_out','ex1.pdf'),os.path.join(os.path.dirname(__file__),'pdf_out','ex2.pdf'),0,os.path.join(os.path.dirname(__file__),'pdf_out','pdf_insert.pdf'))
+
+# Convert PDF to images (convert one file)
+ManagerPdf.pdf_to_images('document.pdf', output_dir='pdf_images')
+# Convert PDF to images (convert all files in a directory)
+ManagerPdf.pdf_to_images('pdf_folder', output_dir='pdf_images', dpi=2)
 ```
 
 ### docx Processing
