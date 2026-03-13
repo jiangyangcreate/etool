@@ -160,6 +160,20 @@ ManagerMd.extract_tables_to_excel("document.md", "tables.xlsx")
 
 ## 其他
 
+### 标准库调用分析
+
+```python
+from etool import analyze_stdlib_usage, ManagerStdlibUsage
+
+# 分析指定目录下所有非 `.venv` 中的 `.py` 文件，
+# 统计标准库模块及其方法/属性的调用次数
+result = analyze_stdlib_usage("path/to/your/project")
+
+# 或者直接获取 JSON 字符串
+json_result = ManagerStdlibUsage.analyze_to_json("path/to/your/project")
+print(json_result)
+```
+
 ### 任务调度
 
 ```python

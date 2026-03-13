@@ -54,6 +54,14 @@ except ImportError as e:
     _failed_imports.append(("ManagerMenu", str(e)))
     warnings.warn(f"Failed to import ManagerMenu: {e}", ImportWarning)
 
+try:
+    from ._other._stdlib_usage import ManagerStdlibUsage, analyze_stdlib_usage
+    __all__.append("ManagerStdlibUsage")
+    __all__.append("analyze_stdlib_usage")
+except ImportError as e:
+    _failed_imports.append(("ManagerStdlibUsage", str(e)))
+    warnings.warn(f"Failed to import ManagerStdlibUsage: {e}", ImportWarning)
+
 # 办公工具模块
 try:
     from ._office._image import ManagerImage
@@ -141,4 +149,4 @@ def is_available(module_name: str) -> bool:
 
 def get_version() -> str:
     """获取版本信息"""
-    return "1.0.0"
+    return "1.4.6"

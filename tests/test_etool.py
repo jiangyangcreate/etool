@@ -202,4 +202,56 @@ def test_install_manager():
         requirements_file=requirements_file, failed_file=failed_file, retry=2
     )
     assert continue_install is True
+
+
+def test_analyze_stdlib_usage_tmpdir(tmp_path):
+    # 创建一个临时目录结构
+    project_dir = tmp_path / "proj"
+    project_dir.mkdir()
+
+    # 文件 1：多种标准库调用
+    file1 = project_dir / "a.py"
+    file1.write_text(
+        "import os\n"
+        "from sys import exit as sys_exit\n"
+        "from math import sqrt\n"
+        "\n"
+        "os.path.join('a', 'b')\n"
+        "os.listdir('.')\n"
+        "sys_exit(0)\n"
+        "sqrt(4)\n",
+        encoding="utf-8",
+    )
+
+    # 文件 2：非标准库调用，应被忽略
+    file2 = project_dir / "b.py"
+    file2.write_text(
+        "import numpy as np\n"
+        "from somepkg import foo\n"
+        "\n"
+        "np.array([1, 2, 3])\n"
+        "foo()\n",
+        encoding="utf-8",
+    )
+
+    # 调用分析函数
+    result = analyze_stdlib_usage(str(project_dir))
+
+    # 只验证我们确定的标准库模块
+    assert "os" in result
+    # 至少记录到 path.join 和 listdir 各一次
+    assert result["os"]["path.join"] >= 1
+    assert result["os"]["listdir"] >= 1
+
+    assert "sys" in result
+    assert result["sys"]["exit"] >= 1
+
+    # math.sqrt 调用至少一次
+    assert "math" in result
+    assert result["math"]["sqrt"] >= 1
+
+    # 第三方库不应出现在结果中（如果当前环境安装了 numpy）
+    assert "numpy" not in result
+
+
 #  pytest tests/test_etool.py --disable-warnings

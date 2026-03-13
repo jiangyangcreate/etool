@@ -159,6 +159,19 @@ ManagerMd.extract_tables_to_excel("document.md", "tables.xlsx")
 
 ## Others
 
+### Standard Library Usage Analysis
+
+```python
+from etool import analyze_stdlib_usage, ManagerStdlibUsage
+
+# Analyze how often standard-library modules and their attributes are called
+result = analyze_stdlib_usage("path/to/your/project")
+
+# Or get JSON string directly
+json_result = ManagerStdlibUsage.analyze_to_json("path/to/your/project")
+print(json_result)
+```
+
 ### Task Scheduling
 
 ```python
