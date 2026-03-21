@@ -1,4 +1,6 @@
 import subprocess
+import sys
+
 
 class ManagerInstall:
 
@@ -19,7 +21,7 @@ class ManagerInstall:
                 try:
                     # use subprocess to execute pip install command
                     result = subprocess.run(
-                        ["pip", "install", package],
+                        [sys.executable, "-m", "pip", "install", package],
                         stdout=subprocess.PIPE,
                         stderr=subprocess.PIPE,
                         text=True,

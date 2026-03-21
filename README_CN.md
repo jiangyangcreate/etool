@@ -1,265 +1,419 @@
 # [English](README.md) | 中文
 
-# 安装
+跨平台 Python 工具集（**2.0**）。**`etool` 命令行**覆盖主要能力；加 **`--json`** 时 stdout 为缩进排版后的 JSON（`ok` / `err`），仍为合法 JSON，便于阅读与程序解析。
 
-使用 pip 安装 etool:
+**需要 Python 3.12+。**
+
+## 安装
 
 ```bash
 pip install -U etool
 ```
 
-# 功能与使用示例
+安装后可直接使用 `etool`，也可用 `python -m etool ...`。在克隆目录下用 uv：`uv run etool ...`。
 
-## 网络
+---
 
-### 测试网络速度
+## 命令行：`--json` 约定
 
-```python
-from etool import ManagerSpeed
-ManagerSpeed.network() # 网络测试
-ManagerSpeed.disk() # 硬盘测试
-ManagerSpeed.memory() # 内存测试
-ManagerSpeed.gpu_memory() # GPU测试
+使用 **`--json`** 时，每次命令在 stdout 输出**一份**缩进后的 JSON（多行，2 空格缩进）：
+
+- 成功：`{"ok": true, "data": { ... }}`
+- 失败：`{"ok": false, "error": {"code", "message", "details"}}`
+
+不加 `--json` 时，为便于人类阅读，多为结构化内容的友好输出（常为缩进 JSON）。
+
+下文 **输入** 为示例命令；**输出** 为典型 **`--json`** 的 stdout（路径、密码、速度等数值仅为示例）。
+
+---
+
+### 版本
+
+**输入**
+
+```bash
+etool --json version
 ```
 
-## 屏幕与文件分享
+**输出**
 
-### 分享屏幕
-
-```python
-from etool import ManagerShare
-ManagerShare.screen_share() # 分享屏幕
+```json
+{"ok": true, "data": {"version": "2.0.0"}}
 ```
 
-### 分享文件
+---
 
-```python
-from etool import ManagerShare
-ManagerShare.share_file() # 分享文件
+### 密码
+
+**随机密码**
+
+```bash
+etool --json password random --length 16
 ```
 
-## 办公
-
-### PDF处理
-
-```python
-from etool import ManagerPdf
-
-# doc、xlsx等转换为pdf(转换一个)
-ManagerPdf.pdfconverter(os.path.join(os.path.dirname(__file__),'pdf','ex1.docx'),os.path.join(os.path.dirname(__file__),'pdf_out'))
-# doc、xlsx等转换为pdf(转换一个目录下的所有文件)
-ManagerPdf.pdfconverter(os.path.join(os.path.dirname(__file__),'pdf'),os.path.join(os.path.dirname(__file__),'pdf_out'))
-
-# 给pdf文件添加水印（一个文件）
-ManagerPdf.create_watermarks(os.path.join(os.path.dirname(__file__),'pdf_out','ex1.pdf'),os.path.join(os.path.dirname(__file__),'pdf_out','watermarks.pdf'),os.path.join(os.path.dirname(__file__),'pdf_out_watermark'))
-# 给pdf文件添加水印（一个目录下的所有文件）
-ManagerPdf.create_watermarks(os.path.join(os.path.dirname(__file__),'pdf_out'),os.path.join(os.path.dirname(__file__),'pdf_out','watermarks.pdf'),os.path.join(os.path.dirname(__file__),'pdf_out_watermark'))
-
-
-# 加密pdf文件
-ManagerPdf.encrypt_pdf(os.path.join(os.path.dirname(__file__),'pdf_out','ex1.pdf'),r"1234567890")
-# 解密pdf文件
-ManagerPdf.decrypt_pdf(os.path.join(os.path.dirname(__file__),'pdf_out','ex1_encrypted.pdf'),r"1234567890")
-
-# 拆分pdf文件（按页数）每3页一份
-ManagerPdf.split_by_pages(os.path.join(os.path.dirname(__file__),'pdf_out','merged.pdf'),3)
-# 拆分pdf文件（按份数）生成2份
-ManagerPdf.split_by_num(os.path.join(os.path.dirname(__file__),'pdf_out','merged.pdf'),2)
-
-# 将pdf ex2插入到pdf ex1的指定页后
-ManagerPdf.insert_pdf(os.path.join(os.path.dirname(__file__),'pdf_out','ex1.pdf'),os.path.join(os.path.dirname(__file__),'pdf_out','ex2.pdf'),0,os.path.join(os.path.dirname(__file__),'pdf_out','pdf_insert.pdf'))
-
-# PDF转图片（转换单个文件）
-ManagerPdf.pdf_to_images('document.pdf', output_dir='pdf_images')
-# PDF转图片（转换一个目录下的所有文件）
-ManagerPdf.pdf_to_images('pdf_folder', output_dir='pdf_images', dpi=2)
+```json
+{"ok": true, "data": {"password": "xYz9...共16位"}}
 ```
 
-### docx处理
+**任意进制转换**
 
-```python
-from etool import ManagerDocx
-word_path = 'ex1.docx' # docx文件路径
-result_path = 'result' # 保存路径
-ManagerDocx.replace_words(word_path, '1', '2') # 替换文档中的文字
-ManagerDocx.change_forward(word_path, 'result.docx') # 更改文档格式
-ManagerDocx.get_pictures(word_path, result_path) # 提取docx中的图片至result文件夹
+```bash
+etool --json password convert-base --from-base 16 --to-base 2 A1F
 ```
 
-### 邮件发送
-
-```python
-from etool import ManagerEmail
-ManagerEmail.send_email(
-    sender='1234567890@qq.com',
-    password='1234567890',
-    recipient='1234567890@qq.com',
-    subject='测试邮件',
-    message='测试邮件内容',
-    file_path='test.txt',
-    image_path='test.webp'
-) # 发送邮件
+```json
+{"ok": true, "data": {"result": "101000011111"}}
 ```
 
-### 图片处理
+---
 
-```python
-from etool import ManagerImage
-pics = ['pic1.webp', 'pic2.webp'] # 图片路径列表
-ManagerImage.merge_LR(pics) # 左右拼接
-ManagerImage.merge_UD(pics) # 上下拼接
-ManagerImage.fill_image('pic1_UD.webp') # 填充图片
-ManagerImage.cut_image('pic1_UD_fill.webp') # 裁剪图片
-ManagerImage.rename_images('tests', remove=True) # 重命名图片
+### 测速（网络 / 磁盘 / 内存）
+
+**网络**（依赖 speedtest-cli，需外网，可能较慢）
+
+```bash
+etool --json speed network
 ```
 
-### 表格处理
-
-```python
-from etool import ManagerExcel
-excel_path = 'ex1.xlsx' # excel文件路径
-save_path = 'result.xlsx' # 保存路径
-ManagerExcel.excel_format(excel_path, save_path) # 复制ex1.xlsx的样式到result.xlsx
+```json
+{"ok": true, "data": {"report": "\n network test result:\ndownload speed: ... Mbps\n..."}}
 ```
 
-### 二维码生成
+**磁盘**
 
-```python
-from etool import ManagerQrcode
-qr_path = 'qr.png' # 保存路径
-ManagerQrcode.generate_english_qrcode(words='https://www.baidu.com', qr_path) # 生成不含中文的二维码
-ManagerQrcode.generate_qrcode(words='百度', qr_path) # 生成含中文的二维码
-ManagerQrcode.decode_qrcode(qr_path) # 解码二维码
+```bash
+etool --json speed disk --file-size-mb 10
 ```
 
-### ipynb转换
-
-```python
-from etool import ManagerIpynb
-ipynb_dir = 'ipynb_dir' # ipynb文件夹路径
-md_dir = 'md' # md文件夹路径
-
-ManagerIpynb.merge_notebooks(ipynb_dir) # 合并ipynb文件
-ManagerIpynb.convert_notebook_to_markdown(ipynb_dir+'.ipynb', md_dir) # 将ipynb文件转换为md文件
+```json
+{"ok": true, "data": {"report": "\n disk test result:\nread speed: ... MB/s\nwrite speed: ... MB/s\n"}}
 ```
 
-## Markdown处理
+**内存**（标准库缓冲粗略测速）
 
-```python
-from etool import ManagerMd
-
-# 将Markdown转换为Word文档
-ManagerMd.convert_md_to_docx("document.md", "document.docx")
-
-# 将Markdown转换为HTML网页
-ManagerMd.convert_md_to_html("document.md", "document.html")
-
-# 从Markdown提取表格到Excel
-ManagerMd.extract_tables_to_excel("document.md", "tables.xlsx")
+```bash
+etool --json speed memory --size-mb 32
 ```
 
-## 其他
+```json
+{"ok": true, "data": {"report": "\n memory test result:\nread speed: ... MB/s\nwrite speed: ... MB/s"}}
+```
+
+---
+
+### PDF（`ManagerPdf`）
+
+**合并**
+
+```bash
+etool --json pdf merge --out merged.pdf a.pdf b.pdf
+```
+
+```json
+{"ok": true, "data": {"merged": "merged.pdf", "log": "merged: a.pdf\nmerged: b.pdf\nmerged file saved as: merged.pdf"}}
+```
+
+**按每份页数拆分**
+
+```bash
+etool --json pdf split-pages --pages 3 document.pdf
+```
+
+```json
+{"ok": true, "data": {"source": "document.pdf", "log": "generated: document_part_by_page1.pdf\n..."}}
+```
+
+**按份数拆分**
+
+```bash
+etool --json pdf split-num --parts 2 document.pdf
+```
+
+```json
+{"ok": true, "data": {"source": "document.pdf", "log": "..."}}
+```
+
+**加密 / 解密**
+
+```bash
+etool --json pdf encrypt --password 密钥 doc.pdf --out doc_encrypted.pdf
+etool --json pdf decrypt --password 密钥 doc_encrypted.pdf --out doc_clear.pdf
+```
+
+```json
+{"ok": true, "data": {"log": "encrypted file saved as: doc_encrypted.pdf"}}
+```
+
+**在指定页后插入另一 PDF**
+
+```bash
+etool --json pdf insert --pdf1 a.pdf --pdf2 b.pdf --after-page 0 --out out.pdf
+```
+
+```json
+{"ok": true, "data": {"output": "out.pdf", "log": "inserted file saved as: out.pdf"}}
+```
+
+**水印**
+
+```bash
+etool --json pdf watermark --target 某文件或目录 --watermark wm.pdf --out-dir watermarked
+```
+
+```json
+{"ok": true, "data": {"log": "..."}}
+```
+
+**PDF 转 PNG**
+
+```bash
+etool --json pdf to-images --input doc.pdf --out-dir png_out --dpi 2
+```
+
+```json
+{"ok": true, "data": {"log": "found 1 PDF file(s)\n..."}}
+```
+
+---
+
+### Word（`ManagerDocx`）
+
+**替换文字**
+
+```bash
+etool --json docx replace --path report.docx --old foo --new bar
+```
+
+```json
+{"ok": true, "data": {"path": "report.docx"}}
+```
+
+**交换页面宽高**
+
+```bash
+etool --json docx swap-dimensions --input in.docx --output out.docx
+```
+
+```json
+{"ok": true, "data": {"path": "out.docx"}}
+```
+
+**导出内嵌图片**
+
+```bash
+etool --json docx extract-images --input in.docx --out-dir ./img_out
+```
+
+```json
+{"ok": true, "data": {"path": "./img_out"}}
+```
+
+---
+
+### Excel（`ManagerExcel`）
+
+**按模板复制样式到新文件**
+
+```bash
+etool --json excel copy-format --source template.xlsx --output out.xlsx
+```
+
+```json
+{"ok": true, "data": {"path": "out.xlsx"}}
+```
+
+---
+
+### 图片（`ManagerImage`）
+
+**左右 / 上下拼接**
+
+```bash
+etool --json image merge-lr left.png right.png --out lr.png
+etool --json image merge-ud top.png bottom.png --out ud.png
+```
+
+```json
+{"ok": true, "data": {"path": "lr.png"}}
+```
+
+**填成正方形 / 九宫格裁剪 / 批量转 webp 重命名**
+
+```bash
+etool --json image fill-square photo.jpg --out square.jpg
+etool --json image cut-grid photo.jpg
+etool --json image rename-webp ./shots --remove-original
+```
+
+```json
+{"ok": true, "data": {"paths": ["photo_cut00.jpg", "..."]}}
+```
+
+---
+
+### 二维码（`ManagerQrcode`）
+
+**生成**
+
+```bash
+etool --json qrcode generate --text "https://example.com" --out qr.png
+```
+
+```json
+{"ok": true, "data": {"path": "qr.png"}}
+```
+
+**识别（本机 OpenCV）**
+
+```bash
+etool --json qrcode decode qr.png
+```
+
+```json
+{"ok": true, "data": {"text": "https://example.com"}}
+```
+
+---
+
+### Jupyter（`ManagerIpynb`）
+
+**合并目录下所有 ipynb**
+
+```bash
+etool --json ipynb merge-dir ./notebooks/
+```
+
+```json
+{"ok": true, "data": {"path": "./notebooks.ipynb"}}
+```
+
+**ipynb → Markdown**
+
+```bash
+etool --json ipynb to-markdown analysis.ipynb --out-dir ./md_out
+```
+
+```json
+{"ok": true, "data": {"path": "analysis.md"}}
+```
+
+---
+
+### Markdown（`ManagerMd`）
+
+```bash
+etool --json md to-docx notes.md --out notes.docx
+etool --json md to-html notes.md --out notes.html
+etool --json md tables-to-xlsx tables.md --out tables.xlsx
+```
+
+```json
+{"ok": true, "data": {"message": "已将Markdown文件转换为Word文档并保存至: notes.docx"}}
+```
+
+---
 
 ### 标准库调用分析
 
-```python
-from etool import analyze_stdlib_usage, ManagerStdlibUsage
-
-# 分析指定目录下所有非 `.venv` 中的 `.py` 文件，
-# 统计标准库模块及其方法/属性的调用次数
-result = analyze_stdlib_usage("path/to/your/project")
-
-# 或者直接获取 JSON 字符串
-json_result = ManagerStdlibUsage.analyze_to_json("path/to/your/project")
-print(json_result)
+```bash
+etool --json stdlib analyze ./src
+etool --json stdlib analyze-json ./src
 ```
 
-### 任务调度
-
-```python
-from etool import ManagerScheduler
-
-def job():
-    print("job")
-    raise Exception("error")
-
-def func_success():
-    print("success")
-
-def func_failure():
-    print("failure")
-
-ManagerScheduler.pocwatch(job, 2, func_success, func_failure)
-"""
-- `job`: 任务函数
-- `schedule_time`: 执行时间
-- `func_success`: 任务成功时的回调函数
-- `func_failure`: 任务失败时的回调函数
-
-`schedule_time`的格式如下：
-
-如果是数字则默认单位是秒，每间隔`schedule_time`秒执行一次，例如`120`，则每2分钟执行一次。
-
-如果是字符串则默认是时间点，请遵从`HH:MM`的格式，例如`08:00`，每天在这个时间点执行一次。
-
-如果是列表，则默认是多个时间点，例如`["08:00", "12:00", "16:00"]`，每天在这些时间点执行一次。
-
-如果传入的是字典，则解析字典的键：
-
-如果字典的键为数字，则默认是日期，对应字典的值遵从上方数字、字符串、列表的判断。
-
-如果字典的键为字符串，则默认是星期几（以周一为例，支持的写法包括：`1`、`monday`、`Monday`、`MONDAY`、`mon`、`mon.`、`m`，以此类推），对应字典的值遵从上方数字、字符串、列表的判断。
-
-例如下面是1号的8点、2号的8点、12点、16点、3号每隔一个小时执行一次、每周一的8点执行一次。
-
-schedule_time = {
-1: "08:00",
-2: ["08:00", "12:00", "16:00"],
-3: 216000,
-"1": "08:00",
-}
-
-"""
-# 如果你不确定调度时间，可以先使用parse_schedule_time函数，确认一下
-ManagerScheduler.parse_schedule_time(120)
-ManagerScheduler.parse_schedule_time("08:00")
-ManagerScheduler.parse_schedule_time(["08:00", "12:00", "16:00"])
-ManagerScheduler.parse_schedule_time({1: "08:00", 2: ["08:00", "12:00", "16:00"], 3: 216000, "1": "08:00"})
+```json
+{"ok": true, "data": {"result": {"os": {"path.join": 12, "listdir": 3}}}}
 ```
 
-### 密码生成与进制转换
-
-```python
-from etool import ManagerPassword
-print(ManagerPassword.generate_pwd_list(ManagerPassword.results['all_letters'] + ManagerPassword.results['digits'], 2))
-# 生成2位密码的所有可能（可用于密码爆破）
-print(ManagerPassword.random_pwd(8))
-# 随机生成8位密码（随机加密）
-
-print(ManagerPassword.convert_base("A1F", 16, 2))
-# 将16进制转换为2进制
-print(ManagerPassword.convert_base("-1101", 2, 16))
-# 将2进制转换为16进制
-print(ManagerPassword.convert_base("Z", 36, 10))
-# 将36进制转换为10进制
+```json
+{"ok": true, "data": {"json": "{\n  \"os\": {\n    \"path.join\": 12\n  }\n}"}}
 ```
 
-### 安装依赖
+---
+
+### 按 requirements 安装（`ManagerInstall`）
+
+内部使用 `python -m pip install`。
 
 ```bash
-from etool import ManagerInstall
-ManagerInstall.install(requirements_file="requirements.txt", failed_file="failed_requirements.txt", retry=2)
-# 自动安装依赖，如果安装失败，则重试2次, 如果安装成功，则跳过安装.以上为默认缺省参数
-# 你也可以不指定参数，使用默认参数
-ManagerInstall.install()
+etool --json install-reqs --file requirements.txt --failed-file failed.txt --retry 2
 ```
 
-### 管理windows右键菜单
+```json
+{"ok": true, "data": {"success": true}}
+```
+
+失败时示例：
+
+```json
+{"ok": false, "error": {"code": "RUNTIME_ERROR", "message": "some packages failed to install", "details": {}}}
+```
+
+---
+
+### 定时任务解析调试（`ManagerScheduler.parse_schedule_time`）
+
+```bash
+etool --json scheduler parse 120
+etool --json scheduler parse '"08:00"'
+```
+
+```json
+{"ok": true, "data": {"log": "Execute every 120 seconds"}}
+```
+
+---
+
+### 发邮件（`ManagerEmail.send_email`）
+
+勿在命令行历史中暴露真实密码；自动化请用环境变量等注入。
+
+```bash
+etool --json email send \
+  --sender you@example.com \
+  --password "$SMTP_PASSWORD" \
+  --recipient other@example.com \
+  --message "你好" \
+  --subject "测试"
+```
+
+```json
+{"ok": true, "data": {"result": "send success"}}
+```
+
+---
+
+## Python API 与 AI 结构体
 
 ```python
-from etool import ManagerMenu
-ManagerMenu.switch_to_classic_menu() # 切换到Windows 11经典右键菜单
-ManagerMenu.switch_to_new_menu() # 切换到Windows 11新版右键菜单
-ManagerMenu.add_cursor_context_menu() # 添加Cursor到Windows右键菜单
-ManagerMenu.remove_cursor_context_menu() # 移除Cursor从Windows右键菜单
+from etool import ok, err, EtoolError, ErrorCode
+
+payload = ok({"path": "/tmp/out.pdf"})
+failure = err(EtoolError(ErrorCode.VALIDATION_ERROR, "参数错误", {"field": "x"}))
+```
+
+---
+
+## 2.0 已删除的能力
+
+- Windows 注册表 / 右键菜单（`ManagerMenu`）
+- 屏幕分享与文件分享（`ManagerShare`）
+- GPU 相关测速
+- `ManagerPdf.pdfconverter`（依赖本机 Office 的批量转 PDF）
+
+---
+
+## 开发
+
+推荐使用 [uv](https://docs.astral.sh/uv/)：`uv sync` 会安装运行依赖与 `dev` 组（含 pytest）。请将 `uv.lock` 一并纳入版本控制。
+
+```bash
+uv sync
+uv run pytest tests/test_etool.py -v
+```
+
+使用 pip：
+
+```bash
+pip install -e ".[dev]"
+pytest tests/test_etool.py -v
 ```

@@ -1,19 +1,25 @@
-import speedtest
+"""Cross-platform speed benchmarks (no GPU / no CUDA)."""
+
+from __future__ import annotations
+
+import tempfile
 import time
 import os
-import tempfile
-try:
-    import pynvml
-except ImportError:
-    print("Warning: pynvml not available, GPU monitoring features disabled")
-import numpy as np
-from numba import cuda
+
 
 class ManagerSpeed:
-    results = {}
+    results: dict = {}
+
     @classmethod
-    def network(cls):
-        """Test network speed"""
+    def network(cls) -> str:
+        """Test network speed (requires optional speedtest-cli)."""
+        try:
+            import speedtest  # type: ignore[import-untyped]
+        except ImportError:
+            msg = "speedtest not installed; pip install speedtest-cli"
+            cls.results["network"] = None
+            return msg
+
         try:
             st = speedtest.Speedtest(secure=True, source_address=None)
             st.get_best_server()
@@ -27,160 +33,88 @@ class ManagerSpeed:
                 "upload_speed": f"{upload_speed:.2f} Mbps",
                 "ping": f"{ping:.2f} ms",
             }
-            info = f"""\n network test result:
-download speed: {cls.results['network']['download_speed']}
-upload speed: {cls.results['network']['upload_speed']}
-ping: {cls.results['network']['ping']}
-"""
-
+            info = (
+                f"\n network test result:\n"
+                f"download speed: {cls.results['network']['download_speed']}\n"
+                f"upload speed: {cls.results['network']['upload_speed']}\n"
+                f"ping: {cls.results['network']['ping']}\n"
+            )
             print(info)
             return info
-
         except Exception as e:
-            print(f"network test failed: {str(e)}")
             cls.results["network"] = None
-            return f"network test failed: {str(e)}"
+            out = f"network test failed: {e}"
+            print(out)
+            return out
 
     @classmethod
-    def disk(cls, file_size_mb=100):
-        """Test disk read and write speed"""
+    def disk(cls, file_size_mb: int = 100) -> str:
+        """Test disk read and write speed (stdlib + temp file)."""
         try:
-            # Create a temporary test file
             temp_file = tempfile.NamedTemporaryFile(delete=False)
             file_path = temp_file.name
 
-            # Write test
-            data = os.urandom(1024 * 1024)  # 1MB random data
+            data = os.urandom(1024 * 1024)
             start_time = time.time()
-
             for _ in range(file_size_mb):
                 temp_file.write(data)
             temp_file.close()
 
             write_time = time.time() - start_time
-            write_speed = file_size_mb / write_time  # MB/s
+            write_speed = file_size_mb / write_time
 
-            # Read test
             start_time = time.time()
             with open(file_path, "rb") as f:
                 while f.read(1024 * 1024):
-
                     pass
-
             read_time = time.time() - start_time
-            read_speed = file_size_mb / read_time  # MB/s
+            read_speed = file_size_mb / read_time
 
-            # Clean up the temporary file
             os.unlink(file_path)
 
             cls.results["disk"] = {
                 "read_speed": f"{read_speed:.2f} MB/s",
                 "write_speed": f"{write_speed:.2f} MB/s",
             }
-            info = f"""\n disk test result:
-read speed: {cls.results['disk']['read_speed']}
-write speed: {cls.results['disk']['write_speed']}
-"""
-
+            info = (
+                f"\n disk test result:\n"
+                f"read speed: {cls.results['disk']['read_speed']}\n"
+                f"write speed: {cls.results['disk']['write_speed']}\n"
+            )
             print(info)
             return info
-
         except Exception as e:
-            print(f"disk test failed: {str(e)}")
             cls.results["disk"] = None
-            return f"disk test failed: {str(e)}"
+            out = f"disk test failed: {e}"
+            print(out)
+            return out
 
     @classmethod
-    def memory(cls, size_mb=1000):
-        """Test memory read and write speed"""
+    def memory(cls, size_mb: int = 1000) -> str:
+        """Memory read/write throughput using stdlib bytes (no NumPy)."""
         try:
-            num_elements = (
-                size_mb * 1024 * 1024 // 8
-            )  # Calculate the number of double precision floating point numbers
-            # Write test (includes the time for NumPy to generate data efficiently)
-            start_time = time.time()
-            data = np.random.rand(num_elements)
+            chunk = 1024 * 1024
+            n = max(1, size_mb)
+            start = time.time()
+            buf = bytearray()
+            for _ in range(n):
+                buf += os.urandom(chunk)
+            write_time = time.time() - start
+            write_speed = (n * chunk / (1024 * 1024)) / write_time
 
-            write_time = time.time() - start_time
-            write_speed = size_mb / write_time
+            start = time.time()
+            s = 0
+            for i in range(0, len(buf), chunk):
+                s += sum(buf[i : i + chunk])
+            read_time = time.time() - start
+            read_speed = (n * chunk / (1024 * 1024)) / read_time
 
-            # Read test (force reading data)
-            start_time = time.time()
-            _ = np.sum(data)  # Ensure data is read
-            read_time = time.time() - start_time
-            read_speed = size_mb / read_time
-
-            # Store results...
-            info = f"""\n memory test result:
-read speed: {read_speed:.2f} MB/s
-write speed: {write_speed:.2f} MB/s"""
-
-            print(info)
-            return info
-
-        except Exception as e:
-            return f"memory test failed: {str(e)}"
-
-    @classmethod
-    def gpu_memory(cls):
-        """Test GPU memory usage"""
-        try:
-            pynvml.nvmlInit()
-            deviceCount = pynvml.nvmlDeviceGetCount()
-            gpu_results = []
-
-            for i in range(deviceCount):
-                handle = pynvml.nvmlDeviceGetHandleByIndex(i)
-                name = pynvml.nvmlDeviceGetName(handle)
-                memory = pynvml.nvmlDeviceGetMemoryInfo(handle)
-                utilization = pynvml.nvmlDeviceGetUtilizationRates(handle)
-
-                size_bytes = 1000 * 1024 * 1024
-
-                # Generate random data
-                host_data = np.random.rand(size_bytes // 4).astype(np.float32)
-
-                # Write test: Host to Device
-                start_time = time.time()
-                device_data = cuda.to_device(host_data)
-                write_time = time.time() - start_time
-                write_speed = 1000 / write_time
-
-                # Read memory test
-                start_time = time.time()
-                device_data.copy_to_host()
-                read_time = time.time() - start_time
-                read_speed = 1000 / read_time
-
-                gpu_info = {
-                    "name": name,
-                    "total_memory": f"{memory.total / (1024**2):.2f} MB",
-                    "used_memory": f"{memory.used / (1024**2):.2f} MB",
-                    "free_memory": f"{memory.free / (1024**2):.2f} MB",
-                    "gpu_utilization": f"{utilization.gpu}%",
-                    "memory_utilization": f"{utilization.memory}%",
-                    "write_speed": f"{write_speed:.2f} MB/s",
-                    "read_speed": f"{read_speed:.2f} MB/s",
-                }
-                gpu_results.append(gpu_info)
-
-            cls.results["gpu"] = gpu_results
-            pynvml.nvmlShutdown()
-            info = f"""\nGPU test result:"""
-            for i, gpu in enumerate(cls.results["gpu"]):
-                info += f"""\nGPU {i+1}:
-name: {gpu['name']}
-total memory: {gpu['total_memory']}
-used memory: {gpu['used_memory']}
-free memory: {gpu['free_memory']}
-gpu utilization: {gpu['gpu_utilization']}
-memory utilization: {gpu['memory_utilization']}
-write speed: {gpu['write_speed']}
-read speed: {gpu['read_speed']}"""
+            info = (
+                f"\n memory test result:\n"
+                f"read speed: {read_speed:.2f} MB/s\n"
+                f"write speed: {write_speed:.2f} MB/s"
+            )
             print(info)
             return info
         except Exception as e:
-
-            print(f"GPU test failed: {str(e)}")
-            cls.results["gpu"] = None
-            return f"GPU test failed: {str(e)}"
+            return f"memory test failed: {e}"

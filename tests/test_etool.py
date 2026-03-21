@@ -1,70 +1,78 @@
+"""Tests for etool 2.x (cross-platform; no GPU/share/COM)."""
+
+from __future__ import annotations
+
+import json
 import os
+import subprocess
 import sys
+from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import MagicMock, patch
+
+import pytest
+
 test_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(test_dir)
 sys.path.insert(0, os.path.join(project_root, "src"))
-from etool import *
-import pytest
-os.chdir("./tests")
 
-def test_speed_manager():
+os.chdir(test_dir)
 
-    assert ManagerSpeed.network() is not None
-
-    assert ManagerSpeed.disk() is not None
-
-    assert ManagerSpeed.memory() is not None
-    assert ManagerSpeed.gpu_memory() is not None
-
-
-def test_screen_share():
-    # 由于 screen_share 是一个长时间运行的服务，测试时可以检查是否能启动
-    assert callable(ManagerShare.screen_share)
-
-
-def test_share_file():
-    # 由于 share_file 是一个长时间运行的服务，测试时可以检查是否能启动
-    assert callable(ManagerShare.share_file)
+from etool import (  # noqa: E402
+    ManagerDocx,
+    ManagerExcel,
+    ManagerImage,
+    ManagerInstall,
+    ManagerIpynb,
+    ManagerMd,
+    ManagerPassword,
+    ManagerPdf,
+    ManagerQrcode,
+    ManagerSpeed,
+    analyze_stdlib_usage,
+    get_version,
+    ok,
+)
+from etool._core.errors import ErrorCode, EtoolError, err  # noqa: E402
+from pypdf import PdfWriter  # noqa: E402
 
 
-# 跳过
+def test_version():
+    assert get_version() == "2.0.0"
+
+
+def test_result_envelope():
+    assert ok({"a": 1})["ok"] is True
+    e = EtoolError(ErrorCode.VALIDATION_ERROR, "bad")
+    assert err(e)["ok"] is False
+
+
+def test_speed_disk_memory():
+    assert ManagerSpeed.disk(file_size_mb=2) is not None
+    assert ManagerSpeed.memory(size_mb=4) is not None
+
+
+@patch("speedtest.Speedtest")
+def test_speed_network_mocked(mock_st):
+    mock_inst = mock_st.return_value
+    mock_inst.get_best_server.return_value = None
+    mock_inst.download.return_value = 10_000_000
+    mock_inst.upload.return_value = 5_000_000
+    mock_inst.results = MagicMock(ping=10.0)
+    assert "Mbps" in ManagerSpeed.network()
+
+
 @pytest.mark.skip(reason="发送邮件不宜频繁测试，跳过")
 def test_email_manager():
-    # 假设 send_email 方法返回 True 表示成功
-    assert (
-        ManagerEmail.send_email(
-            sender="allen_2100@foxmail.com",
-            password="********",
-            message="测试邮件内容",
-            sender_show="allen_2100@foxmail.com",
-            recipient="allen_2100@foxmail.com",
-            recipient_show="allen_2100@foxmail.com",
-            subject="测试邮件",
-            file_path="result.docx",
-            image_path="pic1.webp",
-        )
-        == "send success"
-    )
+    pass
 
 
 @pytest.mark.skip(reason="定时发送不宜频繁测试，跳过")
 def test_scheduler_manager():
-    # 假设 send_email 方法返回 True 表示成功
-    def job():
-        print("job")
-
-    def func_success():
-        print("success")
-
-    def func_failure():
-        print("failure")
-
-    # 每2秒执行一次job，成功时执行func_success，失败时执行func_failure
-    ManagerScheduler.pocwatch(job, 2, func_success, func_failure)
+    pass
 
 
 def test_image_manager():
-    # 假设 merge_LR 和 merge_UD 方法返回合并后的图片路径
     assert ManagerImage.merge_LR(["pic1.webp", "pic2.webp"]) is not None
     assert ManagerImage.merge_UD(["pic1.webp", "pic2.webp"]) is not None
     assert ManagerImage.fill_image("pic1_UD.webp") is not None
@@ -73,12 +81,10 @@ def test_image_manager():
 
 
 def test_password_manager():
-    # 检查生成的密码列表和随机密码是否符合预期
     assert (
         len(
             ManagerPassword.generate_pwd_list(
-                ManagerPassword.results["all_letters"]
-                + ManagerPassword.results["digits"],
+                ManagerPassword.results["all_letters"] + ManagerPassword.results["digits"],
                 2,
             )
         )
@@ -94,122 +100,102 @@ def test_password_manager_convert_base():
 
 
 def test_qrcode_manager():
-    # 假设 gen_en_qrcode 和 gen_qrcode 方法返回生成的二维码路径
-    assert (
-        ManagerQrcode.generate_english_qrcode("https://www.baidu.com", "qr.png")
-        is not None
-    )
+    assert ManagerQrcode.generate_english_qrcode("https://www.baidu.com", "qr.png") is not None
     assert ManagerQrcode.generate_qrcode("百度", "qr.png") is not None
     assert ManagerQrcode.decode_qrcode("qr.png") is not None
 
 
 def test_ipynb_manager():
-    # 假设 merge_notebooks 和 convert_notebook_to_markdown 方法返回 True 表示成功
     assert ManagerIpynb.merge_notebooks("ipynb_dir") is not None
-    assert (
-        ManagerIpynb.convert_notebook_to_markdown("ipynb_dir.ipynb", "md") is not None
-    )
+    out = ManagerIpynb.convert_notebook_to_markdown("ipynb_dir.ipynb", "")
+    assert out is not None
+    assert Path(out).is_file()
 
 
 def test_docx_manager():
-    # 假设 get_pictures 方法返回提取的图片数量
     assert ManagerDocx.replace_words("ex1.docx", "1", "2") is not None
     assert ManagerDocx.change_forward("ex1.docx", "result.docx") is not None
     assert ManagerDocx.get_pictures("ex1.docx", "result") is not None
 
 
 def test_md_docx_manager():
-    # 测试Markdown转换为Word文档功能
     assert ManagerMd.convert_md_to_docx("test.md", "test.docx") is not None
-    
-    # 测试Markdown转换为HTML网页功能
     assert ManagerMd.convert_md_to_html("test.md", "test.html") is not None
-    
-    # 测试从Markdown提取表格到Excel功能
     assert ManagerMd.extract_tables_to_excel("test.md", "test.xlsx") is not None
 
 
 def test_excel_manager():
-    # 假设 excel_format 方法返回 True 表示成功
     assert ManagerExcel.excel_format("ex1.xlsx", "result.xlsx") is not None
 
 
-@pytest.mark.skip(reason="CICD环境没有office组件，跳过")
-def test_pdf_manager():
-    # doc、xlsx等转换为pdf(转换一个)
-    ManagerPdf.pdfconverter(
-        os.path.join(os.path.dirname(__file__), "pdf", "ex1.docx"),
-        os.path.join(os.path.dirname(__file__), "pdf_out"),
-    )
-    # doc、xlsx等转换为pdf(转换一个目录下的所有文件)
-    ManagerPdf.pdfconverter(
-        os.path.join(os.path.dirname(__file__), "pdf"),
-        os.path.join(os.path.dirname(__file__), "pdf_out"),
-    )
+def test_pdf_merge_split_encrypt(tmp_path: Path):
+    a = tmp_path / "a.pdf"
+    b = tmp_path / "b.pdf"
+    w = PdfWriter()
+    w.add_blank_page(width=200, height=200)
+    w.write(a.open("wb"))
+    w2 = PdfWriter()
+    w2.add_blank_page(width=200, height=200)
+    w2.write(b.open("wb"))
 
-    # 给pdf文件添加水印（一个文件）
-    ManagerPdf.create_watermarks(
-        os.path.join(os.path.dirname(__file__), "pdf_out", "ex1.pdf"),
-        os.path.join(os.path.dirname(__file__), "pdf_out", "watermarks.pdf"),
-        os.path.join(os.path.dirname(__file__), "pdf_out_watermark"),
-    )
-    # 给pdf文件添加水印（一个目录下的所有文件）
-    ManagerPdf.create_watermarks(
-        os.path.join(os.path.dirname(__file__), "pdf_out"),
-        os.path.join(os.path.dirname(__file__), "pdf_out", "watermarks.pdf"),
-        os.path.join(os.path.dirname(__file__), "pdf_out_watermark"),
-    )
+    merged = tmp_path / "merged.pdf"
+    ManagerPdf.merge_pdfs([str(a), str(b)], str(merged))
+    assert merged.is_file()
 
-    # 合并pdf文件（一个目录下的所有文件）
-    ManagerPdf.merge_pdfs(
-        os.path.join(os.path.dirname(__file__), "pdf_out"),
-        os.path.join(os.path.dirname(__file__), "pdf_out", "merged.pdf"),
-    )
+    ManagerPdf.split_by_pages(merged, 1)
+    part1 = tmp_path / "merged_part_by_page1.pdf"
+    assert part1.is_file()
 
-    # 拆分pdf文件（按页数）每3页一份
-    ManagerPdf.split_by_pages(
-        os.path.join(os.path.dirname(__file__), "pdf_out", "merged.pdf"), 3
-    )
-    # 拆分pdf文件（按份数）生成2份
-    ManagerPdf.split_by_num(
-        os.path.join(os.path.dirname(__file__), "pdf_out", "merged.pdf"), 2
-    )
-
-    # 将pdf ex2插入到pdf ex1的指定页后
-    ManagerPdf.insert_pdf(
-        os.path.join(os.path.dirname(__file__), "pdf_out", "ex1.pdf"),
-        os.path.join(os.path.dirname(__file__), "pdf_out", "ex2.pdf"),
-        0,
-        os.path.join(os.path.dirname(__file__), "pdf_out", "pdf_insert.pdf"),
-    )
-
-    # 加密pdf文件
-    ManagerPdf.encrypt_pdf(
-        os.path.join(os.path.dirname(__file__), "pdf_out", "ex1.pdf"), r"1234567890"
-    )
-    # 解密pdf文件
-    ManagerPdf.decrypt_pdf(
-        os.path.join(os.path.dirname(__file__), "pdf_out", "ex1_encrypted.pdf"),
-        r"1234567890",
-    )
+    enc = tmp_path / "enc.pdf"
+    ManagerPdf.encrypt_pdf(str(part1), "secret", encrypted_filename=enc)
+    assert enc.is_file()
+    dec = tmp_path / "dec.pdf"
+    ManagerPdf.decrypt_pdf(str(enc), "secret", decrypted_filename=dec)
+    assert dec.is_file()
 
 
-def test_install_manager():
-    # 安装依赖
-    requirements_file = os.path.join(os.path.dirname(__file__), "requirements.txt")
-    failed_file = os.path.join(os.path.dirname(__file__), "failed_requirements.txt")
-    continue_install = ManagerInstall.install(
-        requirements_file=requirements_file, failed_file=failed_file, retry=2
+def test_cli_password_json():
+    exe = sys.executable
+    r = subprocess.run(
+        [exe, "-m", "etool", "--json", "password", "random", "--length", "12"],
+        cwd=project_root,
+        capture_output=True,
+        text=True,
+        check=True,
     )
-    assert continue_install is True
+    data = json.loads(r.stdout.strip())
+    assert data["ok"] is True
+    assert len(data["data"]["password"]) == 12
+
+
+def test_cli_version_json():
+    exe = sys.executable
+    r = subprocess.run(
+        [exe, "-m", "etool", "--json", "version"],
+        cwd=project_root,
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    data = json.loads(r.stdout.strip())
+    assert data["ok"] and data["data"]["version"] == "2.0.0"
+
+
+def test_install_manager_mock_pip():
+    with patch("etool._other._install.subprocess.run") as run:
+        run.return_value = SimpleNamespace(returncode=0)
+        req = os.path.join(test_dir, "requirements.txt")
+        failed = os.path.join(test_dir, "failed_requirements_tmp.txt")
+        assert ManagerInstall.install_requirements(req, failed) is True
+        args = run.call_args[0][0]
+        assert args[0] == sys.executable
+        assert list(args[1:4]) == ["-m", "pip", "install"]
 
 
 def test_analyze_stdlib_usage_tmpdir(tmp_path):
-    # 创建一个临时目录结构
     project_dir = tmp_path / "proj"
     project_dir.mkdir()
 
-    # 文件 1：多种标准库调用
     file1 = project_dir / "a.py"
     file1.write_text(
         "import os\n"
@@ -223,7 +209,6 @@ def test_analyze_stdlib_usage_tmpdir(tmp_path):
         encoding="utf-8",
     )
 
-    # 文件 2：非标准库调用，应被忽略
     file2 = project_dir / "b.py"
     file2.write_text(
         "import numpy as np\n"
@@ -234,24 +219,16 @@ def test_analyze_stdlib_usage_tmpdir(tmp_path):
         encoding="utf-8",
     )
 
-    # 调用分析函数
     result = analyze_stdlib_usage(str(project_dir))
 
-    # 只验证我们确定的标准库模块
     assert "os" in result
-    # 至少记录到 path.join 和 listdir 各一次
     assert result["os"]["path.join"] >= 1
     assert result["os"]["listdir"] >= 1
 
     assert "sys" in result
     assert result["sys"]["exit"] >= 1
 
-    # math.sqrt 调用至少一次
     assert "math" in result
     assert result["math"]["sqrt"] >= 1
 
-    # 第三方库不应出现在结果中（如果当前环境安装了 numpy）
     assert "numpy" not in result
-
-
-#  pytest tests/test_etool.py --disable-warnings

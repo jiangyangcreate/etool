@@ -25,14 +25,12 @@ class ManagerImage:
         _image1_c = _image1.shape[2]
         _image2_h = _image2.shape[0]  # check the size of the image
         _image2_w = _image2.shape[1]
-        if _image1_h >= _image2_h:
+        h = max(_image1_h, _image2_h)
+        w = _image1_w + _image2_w
+        pj1 = np.zeros((h, w, _image1_c))  # horizontal merge
 
-            pj1 = np.zeros((_image1_h, _image1_w + _image2_w, _image1_c))  # horizontal merge
-        else:
-            pj1 = np.zeros((_image2_h, _image1_w + _image2_w, _image1_c))  # horizontal merge
-
-        pj1[:, :_image1_w, :] = _image1.copy()  # img1 on the left
-        pj1[:, _image2_w:, :] = _image2.copy()  # img2 on the right
+        pj1[:_image1_h, :_image1_w, :] = _image1.copy()  # img1 on the left
+        pj1[:_image2_h, _image1_w : _image1_w + _image2_w, :] = _image2.copy()  # img2 on the right
         pj1 = np.array(
             pj1, dtype=np.uint8
         )  # change the data type of the pj1 array to "uint8"
@@ -58,15 +56,12 @@ class ManagerImage:
         _image1_c = _image1.shape[2]
         _image2_h = _image2.shape[0]  # check the size of the image
         _image2_w = _image2.shape[1]
-        if _image1_w >= _image2_w:
+        w = max(_image1_w, _image2_w)
+        h = _image1_h + _image2_h
+        pj = np.zeros((h, w, _image1_c))  # vertical merge
 
-            pj = np.zeros((_image1_h + _image2_h, _image1_w, _image1_c))  # vertical merge
-        else:
-            pj = np.zeros((_image2_h + _image2_h, _image2_w, _image1_c))  # vertical merge
-        # calculate the pixel size of the final image
-
-        pj[:_image1_h, :, :] = _image1.copy()  # img1 on the left
-        pj[_image2_h:, :, :] = _image2.copy()  # img2 on the right
+        pj[:_image1_h, :_image1_w, :] = _image1.copy()  # img1 on top
+        pj[_image1_h : _image1_h + _image2_h, :_image2_w, :] = _image2.copy()  # img2 below
         pj = np.array(
             pj, dtype=np.uint8
         )  # change the data type of the pj array to "uint8"

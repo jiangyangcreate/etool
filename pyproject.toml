@@ -4,40 +4,56 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "etool"
-version = "1.4.6"
+version = "2.0.0"
 authors = [
   { name="Allen", email="jiangyangcreate@gmail.com" },
 ]
 
-description = "A etool package for security monitoring"
+description = "Cross-platform Python utilities with CLI and AI-friendly JSON envelopes"
 readme = "README.md"
-requires-python = ">=3.6"
+requires-python = ">=3.12"
 classifiers = [
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
     "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
 ]
 dependencies = [
     "schedule>=1.1.0",
     "speedtest-cli",
-    "flask",
     "pillow",
     "pypdf",
     "openpyxl",
     "numpy",
-    "numba",
     "opencv-python-headless",
     "python-docx",
     "pymupdf>=1.23.0",
-    "easyqr",
-    "MyQR",
     "qrcode",
     "scikit-image",
-    "pdf2docx",
     "markdown",
-    "beautifulsoup4"
+    "beautifulsoup4",
 ]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+]
+
+# PEP 735: uv installs the `dev` group by default (`uv sync`; use `uv sync --no-dev` to omit).
+[dependency-groups]
+dev = [
+    "pytest>=7.0",
+]
+
+[project.scripts]
+etool = "etool.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/jiangyangcreate/etool"
 Issues = "https://github.com/jiangyangcreate/etool/issues"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
