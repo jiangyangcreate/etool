@@ -38,7 +38,7 @@ etool --json version
 **输出**
 
 ```json
-{"ok": true, "data": {"version": "2.0.0"}}
+{"ok": true, "data": {"version": "2.1.0"}}
 ```
 
 ---
@@ -315,9 +315,11 @@ etool --json md tables-to-xlsx tables.md --out tables.xlsx
 
 ### 标准库调用分析
 
+子命令只有一个：`stdlib analyze <目录>`。默认把统计嵌套在 `data.result`（JSON 对象）。若需要整份结果作为**一条 JSON 文本字符串**放在 `data.json` 里（而不是嵌套对象），加上 `--json-string`。
+
 ```bash
 etool --json stdlib analyze ./src
-etool --json stdlib analyze-json ./src
+etool --json stdlib analyze ./src --json-string
 ```
 
 ```json

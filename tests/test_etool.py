@@ -38,7 +38,7 @@ from pypdf import PdfWriter  # noqa: E402
 
 
 def test_version():
-    assert get_version() == "2.0.0"
+    assert get_version() == "2.1.0"
 
 
 def test_result_envelope():
@@ -178,7 +178,7 @@ def test_cli_version_json():
         check=True,
     )
     data = json.loads(r.stdout.strip())
-    assert data["ok"] and data["data"]["version"] == "2.0.0"
+    assert data["ok"] and data["data"]["version"] == "2.1.0"
 
 
 def test_install_manager_mock_pip():

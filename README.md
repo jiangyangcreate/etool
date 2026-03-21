@@ -38,7 +38,7 @@ etool --json version
 **Output**
 
 ```json
-{"ok": true, "data": {"version": "2.0.0"}}
+{"ok": true, "data": {"version": "2.1.0"}}
 ```
 
 ---
@@ -315,9 +315,11 @@ etool --json md tables-to-xlsx tables.md --out tables.xlsx
 
 ### Standard-library usage analysis
 
+One subcommand: `stdlib analyze DIR`. By default the envelope puts the nested counts under `data.result` (JSON object). With `--json-string`, the same analysis is returned as a single formatted JSON **text** under `data.json` (useful when you want one string field instead of nested JSON).
+
 ```bash
 etool --json stdlib analyze ./src
-etool --json stdlib analyze-json ./src
+etool --json stdlib analyze ./src --json-string
 ```
 
 ```json

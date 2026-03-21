@@ -141,4 +141,4 @@ def is_available(module_name: str) -> bool:
 
 
 def get_version() -> str:
-    return "2.0.0"
+    return "2.1.0"

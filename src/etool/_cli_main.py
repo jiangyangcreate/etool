@@ -49,171 +49,365 @@ def _parse_cli_value(s: str) -> Any:
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="etool", description="etool 2.x command-line interface")
-    parser.add_argument("--version", action="store_true", help="print version and exit")
+    parser = argparse.ArgumentParser(
+        prog="etool",
+        description="etool 2.x command-line interface.",
+        epilog=(
+            "Global: pass --json anywhere in the command line to print the JSON envelope "
+            "(success or error) on stdout instead of human-oriented text."
+        ),
+    )
+    parser.add_argument(
+        "--version",
+        action="store_true",
+        help="Print the package version and exit (flag; no value).",
+    )
     sub = parser.add_subparsers(dest="cmd")
 
-    sub.add_parser("version", help="show package version")
+    sub.add_parser("version", help="Print the package version (same as --version).")
 
     # password
-    p_pw = sub.add_parser("password", help="password utilities")
+    p_pw = sub.add_parser("password", help="Password generation and base conversion.")
     pw_sub = p_pw.add_subparsers(dest="pw_cmd", required=True)
-    p_rand = pw_sub.add_parser("random", help="random password")
-    p_rand.add_argument("--length", type=int, default=16)
-    p_cb = pw_sub.add_parser("convert-base", help="convert number between bases")
-    p_cb.add_argument("value")
-    p_cb.add_argument("--from-base", type=int, required=True)
-    p_cb.add_argument("--to-base", type=int, required=True)
+    p_rand = pw_sub.add_parser("random", help="Generate a random password string.")
+    p_rand.add_argument(
+        "--length",
+        type=int,
+        default=16,
+        metavar="N",
+        help="Password length in characters (int; default: %(default)s).",
+    )
+    p_cb = pw_sub.add_parser("convert-base", help="Convert an integer literal between numeric bases.")
+    p_cb.add_argument(
+        "value",
+        help="Number to convert, as a string in the source base (str).",
+    )
+    p_cb.add_argument(
+        "--from-base",
+        type=int,
+        required=True,
+        metavar="B",
+        help="Source radix / base (int, 2–36).",
+    )
+    p_cb.add_argument(
+        "--to-base",
+        type=int,
+        required=True,
+        metavar="B",
+        help="Target radix / base (int, 2–36).",
+    )
 
     # speed
-    p_sp = sub.add_parser("speed", help="benchmarks (network / disk / memory)")
+    p_sp = sub.add_parser("speed", help="Benchmarks: network, disk, or memory throughput.")
     sp_sub = p_sp.add_subparsers(dest="sp_cmd", required=True)
-    sp_sub.add_parser("network", help="speedtest-cli network test (slow, needs internet)")
-    p_disk = sp_sub.add_parser("disk", help="disk read/write benchmark")
-    p_disk.add_argument("--file-size-mb", type=int, default=20)
-    p_mem = sp_sub.add_parser("memory", help="memory throughput (stdlib)")
-    p_mem.add_argument("--size-mb", type=int, default=64)
+    sp_sub.add_parser(
+        "network",
+        help="Run speedtest-cli (slow; requires internet). Returns a text report.",
+    )
+    p_disk = sp_sub.add_parser("disk", help="Disk read/write benchmark using a temporary file.")
+    p_disk.add_argument(
+        "--file-size-mb",
+        type=int,
+        default=20,
+        metavar="MB",
+        help="Temporary file size for the benchmark (int megabytes; default: %(default)s).",
+    )
+    p_mem = sp_sub.add_parser("memory", help="Memory read/write throughput (stdlib buffers).")
+    p_mem.add_argument(
+        "--size-mb",
+        type=int,
+        default=64,
+        metavar="MB",
+        help="Buffer size for the benchmark (int megabytes; default: %(default)s).",
+    )
 
     # pdf
-    p_pdf = sub.add_parser("pdf", help="PDF operations (pypdf + PyMuPDF)")
+    p_pdf = sub.add_parser("pdf", help="PDF operations (pypdf + PyMuPDF).")
     pdf_sub = p_pdf.add_subparsers(dest="pdf_cmd", required=True)
-    pm = pdf_sub.add_parser("merge", help="merge PDFs")
-    pm.add_argument("--out", required=True, help="output merged PDF path")
-    pm.add_argument("files", nargs="+", help="input PDF files")
-    ps = pdf_sub.add_parser("split-pages", help="split by page count per chunk")
-    ps.add_argument("pdf")
-    ps.add_argument("--pages", type=int, required=True)
-    pn = pdf_sub.add_parser("split-num", help="split into N parts")
-    pn.add_argument("pdf")
-    pn.add_argument("--parts", type=int, required=True)
-    pe = pdf_sub.add_parser("encrypt", help="encrypt PDF")
-    pe.add_argument("pdf")
-    pe.add_argument("--password", required=True)
-    pe.add_argument("--old-password")
-    pe.add_argument("--out")
-    pd = pdf_sub.add_parser("decrypt", help="decrypt PDF")
-    pd.add_argument("pdf")
-    pd.add_argument("--password", required=True)
-    pd.add_argument("--out")
-    pi = pdf_sub.add_parser("insert", help="insert pdf2 after page index in pdf1")
-    pi.add_argument("--pdf1", required=True)
-    pi.add_argument("--pdf2", required=True)
-    pi.add_argument("--after-page", type=int, required=True)
-    pi.add_argument("--out", required=True)
-    pw = pdf_sub.add_parser("watermark", help="apply watermark PDF to pages")
-    pw.add_argument("--target", required=True, help="PDF file or directory of PDFs")
-    pw.add_argument("--watermark", required=True, help="watermark PDF path")
-    pw.add_argument("--out-dir", default="watermarks", help="output directory")
-    pt = pdf_sub.add_parser("to-images", help="rasterize PDF(s) to PNG")
-    pt.add_argument("--input", required=True, help="PDF file or directory")
-    pt.add_argument("--out-dir", default="pdf_images")
-    pt.add_argument("--dpi", type=int, default=2)
+    pm = pdf_sub.add_parser("merge", help="Merge multiple PDF files into one.")
+    pm.add_argument(
+        "--out",
+        required=True,
+        metavar="PATH",
+        help="Output path for the merged PDF (str).",
+    )
+    pm.add_argument(
+        "files",
+        nargs="+",
+        metavar="PDF",
+        help="One or more input PDF paths (str, repeatable).",
+    )
+    ps = pdf_sub.add_parser("split-pages", help="Split a PDF into chunks of N pages each.")
+    ps.add_argument("pdf", help="Input PDF path (str).")
+    ps.add_argument(
+        "--pages",
+        type=int,
+        required=True,
+        metavar="N",
+        help="Page count per output chunk (int).",
+    )
+    pn = pdf_sub.add_parser("split-num", help="Split a PDF into a fixed number of parts.")
+    pn.add_argument("pdf", help="Input PDF path (str).")
+    pn.add_argument(
+        "--parts",
+        type=int,
+        required=True,
+        metavar="N",
+        help="Number of output PDFs (int).",
+    )
+    pe = pdf_sub.add_parser("encrypt", help="Encrypt a PDF with a password.")
+    pe.add_argument("pdf", help="Input PDF path (str).")
+    pe.add_argument(
+        "--password",
+        required=True,
+        metavar="STR",
+        help="New encryption password (str).",
+    )
+    pe.add_argument(
+        "--old-password",
+        metavar="STR",
+        help="Previous password if the PDF is already encrypted (str; optional).",
+    )
+    pe.add_argument(
+        "--out",
+        metavar="PATH",
+        help="Output PDF path (str; optional; default behavior is implementation-defined).",
+    )
+    pd = pdf_sub.add_parser("decrypt", help="Decrypt a password-protected PDF.")
+    pd.add_argument("pdf", help="Input PDF path (str).")
+    pd.add_argument(
+        "--password",
+        required=True,
+        metavar="STR",
+        help="Current PDF password (str).",
+    )
+    pd.add_argument(
+        "--out",
+        metavar="PATH",
+        help="Output PDF path (str; optional).",
+    )
+    pi = pdf_sub.add_parser("insert", help="Insert one PDF after a given page index in another.")
+    pi.add_argument("--pdf1", required=True, metavar="PATH", help="Base PDF path (str).")
+    pi.add_argument("--pdf2", required=True, metavar="PATH", help="PDF to insert (str).")
+    pi.add_argument(
+        "--after-page",
+        type=int,
+        required=True,
+        metavar="N",
+        help="0-based page index after which to insert (int).",
+    )
+    pi.add_argument("--out", required=True, metavar="PATH", help="Output PDF path (str).")
+    pw = pdf_sub.add_parser("watermark", help="Apply a watermark PDF to each page of target PDF(s).")
+    pw.add_argument(
+        "--target",
+        required=True,
+        metavar="PATH",
+        help="PDF file or directory of PDFs (str).",
+    )
+    pw.add_argument(
+        "--watermark",
+        required=True,
+        metavar="PATH",
+        help="Watermark PDF path (str).",
+    )
+    pw.add_argument(
+        "--out-dir",
+        default="watermarks",
+        metavar="DIR",
+        help="Output directory for watermarked PDFs (str; default: %(default)s).",
+    )
+    pt = pdf_sub.add_parser("to-images", help="Rasterize PDF page(s) to PNG image files.")
+    pt.add_argument(
+        "--input",
+        required=True,
+        metavar="PATH",
+        help="Input PDF file or directory (str).",
+    )
+    pt.add_argument(
+        "--out-dir",
+        default="pdf_images",
+        metavar="DIR",
+        help="Output directory for PNG files (str; default: %(default)s).",
+    )
+    pt.add_argument(
+        "--dpi",
+        type=int,
+        default=2,
+        metavar="N",
+        help="Rendering resolution factor passed to the backend (int; default: %(default)s).",
+    )
 
     # docx
-    p_dx = sub.add_parser("docx", help="Word documents")
+    p_dx = sub.add_parser("docx", help="Microsoft Word (.docx) utilities.")
     dx_sub = p_dx.add_subparsers(dest="dx_cmd", required=True)
-    dr = dx_sub.add_parser("replace", help="replace text in docx")
-    dr.add_argument("--path", required=True)
-    dr.add_argument("--old", required=True)
-    dr.add_argument("--new", required=True)
-    dswap = dx_sub.add_parser("swap-dimensions", help="swap page width/height")
-    dswap.add_argument("--input", required=True)
-    dswap.add_argument("--output", required=True)
-    dg = dx_sub.add_parser("extract-images", help="extract embedded images")
-    dg.add_argument("--input", required=True)
-    dg.add_argument("--out-dir", required=True)
+    dr = dx_sub.add_parser("replace", help="Replace text in a .docx file.")
+    dr.add_argument("--path", required=True, metavar="PATH", help="Input .docx path (str).")
+    dr.add_argument("--old", required=True, metavar="STR", help="Text to find (str).")
+    dr.add_argument("--new", required=True, metavar="STR", help="Replacement text (str).")
+    dswap = dx_sub.add_parser("swap-dimensions", help="Swap page width and height.")
+    dswap.add_argument("--input", required=True, metavar="PATH", help="Input .docx path (str).")
+    dswap.add_argument("--output", required=True, metavar="PATH", help="Output .docx path (str).")
+    dg = dx_sub.add_parser("extract-images", help="Extract embedded images from a .docx.")
+    dg.add_argument("--input", required=True, metavar="PATH", help="Input .docx path (str).")
+    dg.add_argument("--out-dir", required=True, metavar="DIR", help="Directory for extracted images (str).")
 
     # excel
-    p_ex = sub.add_parser("excel", help="Excel")
+    p_ex = sub.add_parser("excel", help="Excel spreadsheet utilities.")
     ex_sub = p_ex.add_subparsers(dest="ex_cmd", required=True)
-    ef = ex_sub.add_parser("copy-format", help="copy sheet style from template")
-    ef.add_argument("--source", required=True)
-    ef.add_argument("--output", required=True)
+    ef = ex_sub.add_parser("copy-format", help="Copy sheet formatting from a template workbook.")
+    ef.add_argument("--source", required=True, metavar="PATH", help="Template .xlsx path (str).")
+    ef.add_argument("--output", required=True, metavar="PATH", help="Output .xlsx path (str).")
 
     # image
-    p_im = sub.add_parser("image", help="image merge / grid / rename")
+    p_im = sub.add_parser("image", help="Image merge, padding, grid crop, and batch rename.")
     im_sub = p_im.add_subparsers(dest="im_cmd", required=True)
-    imlr = im_sub.add_parser("merge-lr", help="merge two images left-right")
-    imlr.add_argument("left")
-    imlr.add_argument("right")
-    imlr.add_argument("--out")
-    imud = im_sub.add_parser("merge-ud", help="merge two images top-bottom")
-    imud.add_argument("top")
-    imud.add_argument("bottom")
-    imud.add_argument("--out")
-    imf = im_sub.add_parser("fill-square", help="pad image to square")
-    imf.add_argument("path")
-    imf.add_argument("--out")
-    imc = im_sub.add_parser("cut-grid", help="3x3 grid crop")
-    imc.add_argument("path")
-    imr = im_sub.add_parser("rename-webp", help="rename images in folder to webp + EXIF names")
-    imr.add_argument("folder")
-    imr.add_argument("--remove-original", action="store_true")
+    imlr = im_sub.add_parser("merge-lr", help="Merge two images side by side (left | right).")
+    imlr.add_argument("left", metavar="PATH", help="Left image path (str).")
+    imlr.add_argument("right", metavar="PATH", help="Right image path (str).")
+    imlr.add_argument(
+        "--out",
+        metavar="PATH",
+        help="Output image path (str; optional; default is derived by the implementation).",
+    )
+    imud = im_sub.add_parser("merge-ud", help="Merge two images vertically (top over bottom).")
+    imud.add_argument("top", metavar="PATH", help="Top image path (str).")
+    imud.add_argument("bottom", metavar="PATH", help="Bottom image path (str).")
+    imud.add_argument("--out", metavar="PATH", help="Output image path (str; optional).")
+    imf = im_sub.add_parser("fill-square", help="Pad an image to a square canvas.")
+    imf.add_argument("path", metavar="PATH", help="Input image path (str).")
+    imf.add_argument("--out", metavar="PATH", help="Output image path (str; optional).")
+    imc = im_sub.add_parser("cut-grid", help="Cut an image into a 3×3 grid of tiles.")
+    imc.add_argument("path", metavar="PATH", help="Input image path (str).")
+    imr = im_sub.add_parser("rename-webp", help="Rename images in a folder to WebP with EXIF-based names.")
+    imr.add_argument("folder", metavar="DIR", help="Directory containing images (str).")
+    imr.add_argument(
+        "--remove-original",
+        action="store_true",
+        help="Delete original files after conversion (flag; no value).",
+    )
 
     # qrcode
-    p_qr = sub.add_parser("qrcode", help="QR code")
+    p_qr = sub.add_parser("qrcode", help="QR code generation and decoding.")
     qr_sub = p_qr.add_subparsers(dest="qr_cmd", required=True)
-    qg = qr_sub.add_parser("generate", help="generate QR PNG")
-    qg.add_argument("--text", required=True)
-    qg.add_argument("--out", required=True)
-    qd = qr_sub.add_parser("decode", help="decode QR from image file")
-    qd.add_argument("image")
+    qg = qr_sub.add_parser("generate", help="Write QR code payload to a PNG file.")
+    qg.add_argument("--text", required=True, metavar="STR", help="Data to encode (str).")
+    qg.add_argument("--out", required=True, metavar="PATH", help="Output PNG path (str).")
+    qd = qr_sub.add_parser("decode", help="Read QR payload from an image file.")
+    qd.add_argument("image", metavar="PATH", help="Input image path (str).")
 
     # ipynb
-    p_nb = sub.add_parser("ipynb", help="Jupyter notebooks")
+    p_nb = sub.add_parser("ipynb", help="Jupyter notebook utilities.")
     nb_sub = p_nb.add_subparsers(dest="nb_cmd", required=True)
-    nbm = nb_sub.add_parser("merge-dir", help="merge all .ipynb in directory")
-    nbm.add_argument("directory")
-    nb2 = nb_sub.add_parser("to-markdown", help="convert .ipynb to .md")
-    nb2.add_argument("notebook")
-    nb2.add_argument("--out-dir", default="")
+    nbm = nb_sub.add_parser("merge-dir", help="Merge all .ipynb files in a directory into one notebook.")
+    nbm.add_argument("directory", metavar="DIR", help="Directory to scan (str).")
+    nb2 = nb_sub.add_parser("to-markdown", help="Convert a .ipynb file to Markdown.")
+    nb2.add_argument("notebook", metavar="PATH", help="Input .ipynb path (str).")
+    nb2.add_argument(
+        "--out-dir",
+        default="",
+        metavar="DIR",
+        help="Output directory for the .md file (str; empty uses implementation default).",
+    )
 
     # markdown
-    p_md = sub.add_parser("md", help="Markdown conversions")
+    p_md = sub.add_parser("md", help="Markdown conversion utilities.")
     md_sub = p_md.add_subparsers(dest="md_cmd", required=True)
-    m1 = md_sub.add_parser("to-docx")
-    m1.add_argument("md")
-    m1.add_argument("--out", required=True)
-    m2 = md_sub.add_parser("to-html")
-    m2.add_argument("md")
-    m2.add_argument("--out", required=True)
-    m3 = md_sub.add_parser("tables-to-xlsx")
-    m3.add_argument("md")
-    m3.add_argument("--out", required=True)
+    m1 = md_sub.add_parser("to-docx", help="Convert Markdown to Word (.docx).")
+    m1.add_argument("md", metavar="PATH", help="Input .md path (str).")
+    m1.add_argument("--out", required=True, metavar="PATH", help="Output .docx path (str).")
+    m2 = md_sub.add_parser("to-html", help="Convert Markdown to HTML.")
+    m2.add_argument("md", metavar="PATH", help="Input .md path (str).")
+    m2.add_argument("--out", required=True, metavar="PATH", help="Output .html path (str).")
+    m3 = md_sub.add_parser("tables-to-xlsx", help="Extract Markdown tables to an Excel workbook.")
+    m3.add_argument("md", metavar="PATH", help="Input .md path (str).")
+    m3.add_argument("--out", required=True, metavar="PATH", help="Output .xlsx path (str).")
 
     # stdlib
-    p_st = sub.add_parser("stdlib", help="stdlib usage analysis")
+    p_st = sub.add_parser("stdlib", help="Analyze standard-library call usage in a Python tree.")
     st_sub = p_st.add_subparsers(dest="st_cmd", required=True)
-    sta = st_sub.add_parser("analyze", help="analyze Python project folder")
-    sta.add_argument("folder")
-    stj = st_sub.add_parser("analyze-json", help="same as analyze, JSON string output")
-    stj.add_argument("folder")
+    sta = st_sub.add_parser(
+        "analyze",
+        help=(
+            "Scan .py files under a folder (skips .venv) and count stdlib calls. "
+            "Use --json-string to return the same data as a single JSON text field."
+        ),
+    )
+    sta.add_argument(
+        "folder",
+        metavar="DIR",
+        help="Project root directory to scan recursively (str).",
+    )
+    sta.add_argument(
+        "--json-string",
+        action="store_true",
+        help=(
+            "If set, JSON envelope data uses key 'json' (str): a formatted JSON text blob of the analysis. "
+            "If omitted, data uses key 'result' (object): nested dict module → attr → count (flag; no value)."
+        ),
+    )
 
     # install
-    p_in = sub.add_parser("install-reqs", help="pip install from requirements file")
-    p_in.add_argument("--file", default="requirements.txt")
-    p_in.add_argument("--failed-file", default="failed_requirements.txt")
-    p_in.add_argument("--retry", type=int, default=2)
+    p_in = sub.add_parser("install-reqs", help="Install packages from a requirements file via pip.")
+    p_in.add_argument(
+        "--file",
+        default="requirements.txt",
+        metavar="PATH",
+        help="Requirements file path (str; default: %(default)s).",
+    )
+    p_in.add_argument(
+        "--failed-file",
+        default="failed_requirements.txt",
+        metavar="PATH",
+        help="Where to record failed package lines (str; default: %(default)s).",
+    )
+    p_in.add_argument(
+        "--retry",
+        type=int,
+        default=2,
+        metavar="N",
+        help="Retry count for failed installs (int; default: %(default)s).",
+    )
 
     # scheduler (parse only)
-    p_sc = sub.add_parser("scheduler", help="scheduler helpers")
+    p_sc = sub.add_parser("scheduler", help="Scheduler helper utilities.")
     sc_sub = p_sc.add_subparsers(dest="sc_cmd", required=True)
-    scp = sc_sub.add_parser("parse", help="print parsed schedule description (debug)")
-    scp.add_argument("value", help="JSON, integer seconds, or time string")
+    scp = sc_sub.add_parser("parse", help="Parse a schedule value and print the debug description.")
+    scp.add_argument(
+        "value",
+        metavar="VAL",
+        help=(
+            "Schedule input: JSON value, integer seconds, or time string (str). "
+            "Parsed with json.loads where applicable."
+        ),
+    )
 
     # email
-    p_em = sub.add_parser("email", help="send email (SMTP)")
+    p_em = sub.add_parser("email", help="Send email via SMTP.")
     em_sub = p_em.add_subparsers(dest="em_cmd", required=True)
-    es = em_sub.add_parser("send")
-    es.add_argument("--sender", required=True)
-    es.add_argument("--password", required=True)
-    es.add_argument("--recipient", required=True)
-    es.add_argument("--message", required=True)
-    es.add_argument("--subject", default="")
-    es.add_argument("--sender-show")
-    es.add_argument("--recipient-show")
-    es.add_argument("--file", action="append", dest="files")
-    es.add_argument("--image")
+    es = em_sub.add_parser("send", help="Send one email with optional attachments.")
+    es.add_argument("--sender", required=True, metavar="ADDR", help="SMTP login / From address (str).")
+    es.add_argument("--password", required=True, metavar="STR", help="SMTP password (str).")
+    es.add_argument("--recipient", required=True, metavar="ADDR", help="Recipient email address (str).")
+    es.add_argument("--message", required=True, metavar="STR", help="Email body text (str).")
+    es.add_argument("--subject", default="", metavar="STR", help="Subject line (str; default: empty).")
+    es.add_argument(
+        "--sender-show",
+        metavar="STR",
+        help="Display name for sender in headers (str; optional).",
+    )
+    es.add_argument(
+        "--recipient-show",
+        metavar="STR",
+        help="Display name for recipient in headers (str; optional).",
+    )
+    es.add_argument(
+        "--file",
+        action="append",
+        dest="files",
+        metavar="PATH",
+        help="Attachment file path (str; repeat for multiple files).",
+    )
+    es.add_argument("--image", metavar="PATH", help="Inline image path (str; optional).")
 
     return parser
 
@@ -425,12 +619,12 @@ def main_dispatch(argv: list[str] | None = None) -> int:
         from etool import ManagerStdlibUsage, analyze_stdlib_usage
 
         if args.st_cmd == "analyze":
-            data = analyze_stdlib_usage(args.folder)
-            _emit(ok({"result": data}), as_json=as_json)
-            return 0
-        if args.st_cmd == "analyze-json":
-            s = ManagerStdlibUsage.analyze_to_json(args.folder)
-            _emit(ok({"json": s}), as_json=as_json)
+            if args.json_string:
+                s = ManagerStdlibUsage.analyze_to_json(args.folder)
+                _emit(ok({"json": s}), as_json=as_json)
+            else:
+                data = analyze_stdlib_usage(args.folder)
+                _emit(ok({"result": data}), as_json=as_json)
             return 0
 
     if args.cmd == "install-reqs":
