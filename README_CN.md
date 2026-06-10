@@ -628,6 +628,21 @@ failure = err(EtoolError(ErrorCode.VALIDATION_ERROR, "参数错误", {"field": "
 {"ok": false, "error": {"code": "DEPENDENCY_ERROR", "message": "QR decoding requires OpenCV", "details": {"install": "pip install \"etool[qr-decode]\""}}}
 ```
 
+### Agent Skills
+
+仓库在 [`.cursor/skills/`](.cursor/skills/) 下内置了一组 [Agent Skill](https://cursor.com/docs/context/skills)——按领域拆分的 `SKILL.md`,教会编码 Agent(Cursor、Claude Code 等)何时以及如何调用 `etool` CLI:
+
+| Skill | 覆盖范围 |
+|---|---|
+| `etool-pdf` | 合并 / 拆分 / 加密 / 解密 / 插入 / 水印 / 转图片 |
+| `etool-office` | docx、excel、md、ipynb 相关命令 |
+| `etool-image` | image、qrcode、cheatsheet 相关命令 |
+| `etool-web` | fetch-text、rss、mask-ip |
+| `etool-llm` | chat、summarize、outline |
+| `etool-utils` | password、speed、stdlib analyze |
+
+在本仓库中,Cursor 会自动发现这些 Skill。要在其他项目中使用,把 Skill 目录复制到项目的 `.cursor/skills/`(Cursor)或 `.claude/skills/`(Claude Code)即可——两者格式完全相同,并确保已安装 `etool`(`pip install etool`)。
+
 ## 开发
 
 推荐使用 [uv](https://docs.astral.sh/uv/)(`uv.lock` 已纳入版本控制;dev 组包含重型可选依赖,可直接跑全量测试):

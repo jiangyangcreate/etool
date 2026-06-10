@@ -622,6 +622,21 @@ Missing optional dependencies never break the package: each manager is imported 
 {"ok": false, "error": {"code": "DEPENDENCY_ERROR", "message": "QR decoding requires OpenCV", "details": {"install": "pip install \"etool[qr-decode]\""}}}
 ```
 
+### Agent Skills
+
+The repository ships ready-made [Agent Skills](https://cursor.com/docs/context/skills) under [`.cursor/skills/`](.cursor/skills/) — one `SKILL.md` per domain that teaches a coding agent (Cursor, Claude Code, etc.) when and how to call the `etool` CLI:
+
+| Skill | Covers |
+|---|---|
+| `etool-pdf` | merge / split / encrypt / decrypt / insert / watermark / to-images |
+| `etool-office` | docx, excel, md, ipynb commands |
+| `etool-image` | image, qrcode, cheatsheet commands |
+| `etool-web` | fetch-text, rss, mask-ip |
+| `etool-llm` | chat, summarize, outline |
+| `etool-utils` | password, speed, stdlib analyze |
+
+In this repo they work out of the box with Cursor. To use them elsewhere, copy the skill folders into your project's `.cursor/skills/` (Cursor) or `.claude/skills/` (Claude Code) — the format is identical — and make sure `etool` is installed (`pip install etool`).
+
 ## Development
 
 With [uv](https://docs.astral.sh/uv/) (`uv.lock` is committed; the dev group includes the heavy optional deps so the full test suite runs):
