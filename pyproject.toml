@@ -1,48 +1,89 @@
 [build-system]
-requires = ["setuptools>=61.0", "wheel"]
+requires = ["setuptools>=77", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "etool"
-version = "2.1.0"
+version = "2.2.0"
 authors = [
   { name="Allen", email="jiangyangcreate@gmail.com" },
 ]
 
-description = "Cross-platform Python utilities with CLI and AI-friendly JSON envelopes"
+description = "All-in-one CLI toolbox for office automation: PDF, Word, Excel, images, QR codes, Markdown, LLM and more, with AI-agent-friendly JSON output"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.10"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+keywords = [
+    "cli",
+    "toolbox",
+    "office-automation",
+    "pdf",
+    "docx",
+    "excel",
+    "image",
+    "qrcode",
+    "markdown",
+    "jupyter",
+    "llm",
+    "ai-agent",
+    "cross-platform",
+]
 classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: End Users/Desktop",
+    "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
-    "License :: OSI Approved :: Apache Software License",
-    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Office/Business",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Utilities",
 ]
+# Lightweight by default (~15 MB). Heavy binary wheels (PyMuPDF, OpenCV)
+# are opt-in extras; see [project.optional-dependencies].
 dependencies = [
     "schedule>=1.1.0",
     "speedtest-cli",
     "pillow",
     "pypdf",
     "openpyxl",
-    "numpy",
-    "opencv-python-headless",
     "python-docx",
-    "pymupdf>=1.23.0",
     "qrcode",
-    "scikit-image",
     "markdown",
     "beautifulsoup4",
 ]
 
 [project.optional-dependencies]
+# `etool pdf to-images` (PDF page rasterization)
+pdf-images = [
+    "pymupdf>=1.23.0",
+]
+# `etool qrcode decode` (offline QR recognition)
+qr-decode = [
+    "opencv-python-headless",
+]
+all = [
+    "pymupdf>=1.23.0",
+    "opencv-python-headless",
+]
 dev = [
     "pytest>=7.0",
 ]
 
 # PEP 735: uv installs the `dev` group by default (`uv sync`; use `uv sync --no-dev` to omit).
+# Heavy optional deps are repeated here so a plain `uv sync` can run the full test suite.
 [dependency-groups]
 dev = [
     "pytest>=7.0",
+    "pymupdf>=1.23.0",
+    "opencv-python-headless",
 ]
 
 [project.scripts]
@@ -50,7 +91,10 @@ etool = "etool.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/jiangyangcreate/etool"
+Documentation = "https://github.com/jiangyangcreate/etool#readme"
+Source = "https://github.com/jiangyangcreate/etool"
 Issues = "https://github.com/jiangyangcreate/etool/issues"
+Changelog = "https://github.com/jiangyangcreate/etool/blob/main/CHANGELOG.md"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

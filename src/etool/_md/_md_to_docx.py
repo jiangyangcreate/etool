@@ -26,7 +26,7 @@ class ManagerMd:
         """
         # 确保输入文件存在
         if not os.path.exists(md_path):
-            raise FileNotFoundError(f"找不到Markdown文件: {md_path}")
+            raise FileNotFoundError(f"Markdown file not found: {md_path}")
         
         # 读取Markdown文件内容
         with open(md_path, 'r', encoding='utf-8') as f:
@@ -77,7 +77,7 @@ class ManagerMd:
         
         # 保存Word文档
         doc.save(docx_path)
-        return f"已将Markdown文件转换为Word文档并保存至: {docx_path}"
+        return f"Converted Markdown to Word document: {docx_path}"
 
     @staticmethod
     def _process_paragraph_content(paragraph, element):
@@ -130,7 +130,7 @@ class ManagerMd:
         """
         # 确保输入文件存在
         if not os.path.exists(md_path):
-            raise FileNotFoundError(f"找不到Markdown文件: {md_path}")
+            raise FileNotFoundError(f"Markdown file not found: {md_path}")
         
         # 读取Markdown文件内容
         with open(md_path, 'r', encoding='utf-8') as f:
@@ -146,7 +146,7 @@ class ManagerMd:
         <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Markdown转HTML</title>
+            <title>{Path(md_path).stem}</title>
             <style>
                 body {{
                     font-family: Arial, sans-serif;
@@ -228,7 +228,7 @@ class ManagerMd:
         with open(html_path, 'w', encoding='utf-8') as f:
             f.write(styled_html)
         
-        return f"已将Markdown文件转换为HTML网页并保存至: {html_path}"
+        return f"Converted Markdown to HTML: {html_path}"
 
     @staticmethod
     def extract_tables_to_excel(md_path, excel_path):
@@ -244,7 +244,7 @@ class ManagerMd:
         """
         # 确保输入文件存在
         if not os.path.exists(md_path):
-            raise FileNotFoundError(f"找不到Markdown文件: {md_path}")
+            raise FileNotFoundError(f"Markdown file not found: {md_path}")
         
         # 读取Markdown文件内容
         with open(md_path, 'r', encoding='utf-8') as f:
@@ -260,7 +260,7 @@ class ManagerMd:
         tables = soup.find_all('table')
         
         if not tables:
-            return f"未在Markdown文件中找到表格: {md_path}"
+            return f"No tables found in Markdown file: {md_path}"
         
         # 确保输出目录存在
         output_dir = os.path.dirname(excel_path)
@@ -309,5 +309,5 @@ class ManagerMd:
         # 保存Excel文件
         workbook.save(excel_path)
         
-        return f"已将Markdown文件中的表格提取并转换为Excel文件: {excel_path}"
+        return f"Extracted Markdown tables to Excel workbook: {excel_path}"
 

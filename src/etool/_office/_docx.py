@@ -3,7 +3,6 @@ import re
 from io import BytesIO
 
 import docx
-import numpy as np
 from PIL import Image
 
 

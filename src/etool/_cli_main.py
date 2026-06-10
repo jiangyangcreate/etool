@@ -381,6 +381,77 @@ def _build_parser() -> argparse.ArgumentParser:
         ),
     )
 
+    # llm
+    p_ai = sub.add_parser(
+        "llm",
+        help=(
+            "OpenAI-compatible LLM helpers. Credentials from --api-key/--base-url/--model "
+            "or ETOOL_LLM_* / OPENAI_* environment variables."
+        ),
+    )
+    ai_sub = p_ai.add_subparsers(dest="ai_cmd", required=True)
+
+    def _add_llm_args(p) -> None:
+        p.add_argument("--api-key", metavar="STR", help="API key (str; default: env).")
+        p.add_argument("--base-url", metavar="URL", help="API base URL, e.g. https://api.openai.com/v1 (str; default: env).")
+        p.add_argument("--model", metavar="STR", help="Model name (str; default: env).")
+
+    ac = ai_sub.add_parser("chat", help="Send one prompt and print the reply.")
+    ac.add_argument("prompt", metavar="TEXT", help="User prompt (str).")
+    ac.add_argument("--system", metavar="STR", help="System prompt (str; optional).")
+    ac.add_argument("--temperature", type=float, metavar="F", help="Sampling temperature (float; optional).")
+    _add_llm_args(ac)
+    asu = ai_sub.add_parser("summarize", help="Summarize text (same language as input).")
+    asu.add_argument("text", nargs="?", metavar="TEXT", help="Text to summarize (str; or use --file).")
+    asu.add_argument("--file", metavar="PATH", help="Read the text from a file instead (str; optional).")
+    asu.add_argument("--min-words", type=int, default=50, metavar="N", help="Minimum summary length (int; default: %(default)s).")
+    asu.add_argument("--max-words", type=int, default=150, metavar="N", help="Maximum summary length (int; default: %(default)s).")
+    _add_llm_args(asu)
+    aou = ai_sub.add_parser("outline", help="Structure text into a JSON outline (main_title/sections/points).")
+    aou.add_argument("text", nargs="?", metavar="TEXT", help="Text to outline (str; or use --file).")
+    aou.add_argument("--file", metavar="PATH", help="Read the text from a file instead (str; optional).")
+    _add_llm_args(aou)
+
+    # web
+    p_wb = sub.add_parser("web", help="Web utilities: page text, RSS/Atom feeds, IP masking.")
+    wb_sub = p_wb.add_subparsers(dest="wb_cmd", required=True)
+    wf = wb_sub.add_parser("fetch-text", help="Fetch a URL and print its readable text.")
+    wf.add_argument("url", metavar="URL", help="Page URL (str).")
+    wf.add_argument("--timeout", type=int, default=30, metavar="SEC", help="Request timeout (int seconds; default: %(default)s).")
+    wr = wb_sub.add_parser("rss", help="Parse an RSS 2.0 / Atom feed into entries.")
+    wr.add_argument("source", metavar="SRC", help="Feed URL, local XML file path, or raw XML (str).")
+    wr.add_argument("--limit", type=int, metavar="N", help="Return at most N entries (int; optional).")
+    wm = wb_sub.add_parser("mask-ip", help="Anonymize an IPv4/IPv6 address for display.")
+    wm.add_argument("ip", metavar="IP", help="IP address (str).")
+
+    # cheatsheet
+    p_cs = sub.add_parser("cheatsheet", help="Generate a command cheat-sheet wallpaper PNG.")
+    cs_sub = p_cs.add_subparsers(dest="cs_cmd", required=True)
+    cg = cs_sub.add_parser(
+        "generate",
+        help="Render a cheat-sheet from a JSON data file, or from an LLM via --keyword.",
+    )
+    cg.add_argument("--out", required=True, metavar="PATH", help="Output PNG path (str).")
+    cg.add_argument(
+        "--data",
+        metavar="PATH",
+        help='JSON file: {"categories": [{"name", "commands": [{"command", "description"}]}]} (str).',
+    )
+    cg.add_argument("--keyword", metavar="STR", help="Generate the data with an LLM for this tool/tech (str; needs LLM config).")
+    cg.add_argument("--title", metavar="STR", help="Wallpaper title (str; default derived from keyword/data).")
+    cg.add_argument("--subtitle", metavar="STR", help="Subtitle line (str; optional).")
+    cg.add_argument("--width", type=int, default=1920, metavar="PX", help="Image width (int; default: %(default)s).")
+    cg.add_argument("--height", type=int, default=1080, metavar="PX", help="Image height (int; default: %(default)s).")
+    cg.add_argument("--font", metavar="PATH", help="TTF/TTC font file (str; default: common system fonts).")
+    cg.add_argument(
+        "--left-margin-ratio",
+        type=float,
+        default=0.25,
+        metavar="F",
+        help="Fraction of width kept clear for desktop icons, 0 disables (float; default: %(default)s).",
+    )
+    _add_llm_args(cg)
+
     # email
     p_em = sub.add_parser("email", help="Send email via SMTP.")
     em_sub = p_em.add_subparsers(dest="em_cmd", required=True)
@@ -652,6 +723,97 @@ def main_dispatch(argv: list[str] | None = None) -> int:
             _emit(ok({"log": buf.getvalue().strip()}), as_json=as_json)
             return 0
 
+    if args.cmd == "llm":
+        from etool import ManagerLlm
+
+        creds = {"api_key": args.api_key, "base_url": args.base_url, "model": args.model}
+
+        def _text_arg() -> str:
+            if args.file:
+                return Path(args.file).read_text(encoding="utf-8")
+            if args.text:
+                return args.text
+            raise EtoolError(ErrorCode.VALIDATION_ERROR, "provide TEXT or --file")
+
+        try:
+            if args.ai_cmd == "chat":
+                text = ManagerLlm.chat(
+                    args.prompt, system=args.system, temperature=args.temperature, **creds
+                )
+                _emit(ok({"text": text}), as_json=as_json)
+                return 0
+            if args.ai_cmd == "summarize":
+                text = ManagerLlm.summarize(
+                    _text_arg(), min_words=args.min_words, max_words=args.max_words, **creds
+                )
+                _emit(ok({"summary": text}), as_json=as_json)
+                return 0
+            if args.ai_cmd == "outline":
+                result = ManagerLlm.outline(_text_arg(), **creds)
+                _emit(ok({"outline": result}), as_json=as_json)
+                return 0
+        except EtoolError as e:
+            _emit(err(e), as_json=as_json)
+            return 1
+
+    if args.cmd == "web":
+        from etool import ManagerWeb
+
+        try:
+            if args.wb_cmd == "fetch-text":
+                text = ManagerWeb.fetch_text(args.url, timeout=args.timeout)
+                _emit(ok({"text": text}), as_json=as_json)
+                return 0
+            if args.wb_cmd == "rss":
+                entries = ManagerWeb.rss_entries(args.source)
+                if args.limit is not None:
+                    entries = entries[: args.limit]
+                _emit(ok({"entries": entries}), as_json=as_json)
+                return 0
+            if args.wb_cmd == "mask-ip":
+                masked = ManagerWeb.mask_ip(args.ip)
+                _emit(
+                    ok({"masked": masked, "is_public": ManagerWeb.is_public_ip(args.ip)}),
+                    as_json=as_json,
+                )
+                return 0
+        except EtoolError as e:
+            _emit(err(e), as_json=as_json)
+            return 1
+
+    if args.cmd == "cheatsheet":
+        from etool import ManagerCheatsheet
+
+        try:
+            if args.cs_cmd == "generate":
+                if bool(args.data) == bool(args.keyword):
+                    raise EtoolError(
+                        ErrorCode.VALIDATION_ERROR, "provide exactly one of --data or --keyword"
+                    )
+                if args.data:
+                    data = json.loads(Path(args.data).read_text(encoding="utf-8"))
+                    title = args.title or Path(args.data).stem
+                else:
+                    data = ManagerCheatsheet.data_from_llm(
+                        args.keyword, api_key=args.api_key, base_url=args.base_url, model=args.model
+                    )
+                    title = args.title or f"{args.keyword.upper()} Cheat Sheet"
+                path = ManagerCheatsheet.generate(
+                    data,
+                    args.out,
+                    title=title,
+                    subtitle=args.subtitle,
+                    width=args.width,
+                    height=args.height,
+                    font_path=args.font,
+                    left_margin_ratio=args.left_margin_ratio,
+                )
+                _emit(ok({"path": path}), as_json=as_json)
+                return 0
+        except EtoolError as e:
+            _emit(err(e), as_json=as_json)
+            return 1
+
     if args.cmd == "email":
         from etool import ManagerEmail
 
@@ -675,4 +837,19 @@ def main_dispatch(argv: list[str] | None = None) -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
-    return main_dispatch(argv)
+    raw = list(sys.argv[1:] if argv is None else argv)
+    as_json = "--json" in raw
+    try:
+        return main_dispatch(argv)
+    except EtoolError as e:
+        _emit(err(e), as_json=as_json)
+        return 1
+    except ImportError as e:
+        missing = getattr(e, "name", None) or str(e)
+        wrapped = EtoolError(
+            ErrorCode.DEPENDENCY_ERROR,
+            f"missing optional dependency: {missing}",
+            {"install": 'pip install "etool[all]"'},
+        )
+        _emit(err(wrapped), as_json=as_json)
+        return 1

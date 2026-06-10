@@ -19,16 +19,19 @@ sys.path.insert(0, os.path.join(project_root, "src"))
 os.chdir(test_dir)
 
 from etool import (  # noqa: E402
+    ManagerCheatsheet,
     ManagerDocx,
     ManagerExcel,
     ManagerImage,
     ManagerInstall,
     ManagerIpynb,
+    ManagerLlm,
     ManagerMd,
     ManagerPassword,
     ManagerPdf,
     ManagerQrcode,
     ManagerSpeed,
+    ManagerWeb,
     analyze_stdlib_usage,
     get_version,
     ok,
@@ -38,7 +41,7 @@ from pypdf import PdfWriter  # noqa: E402
 
 
 def test_version():
-    assert get_version() == "2.1.0"
+    assert get_version() == "2.2.0"
 
 
 def test_result_envelope():
@@ -178,7 +181,7 @@ def test_cli_version_json():
         check=True,
     )
     data = json.loads(r.stdout.strip())
-    assert data["ok"] and data["data"]["version"] == "2.1.0"
+    assert data["ok"] and data["data"]["version"] == "2.2.0"
 
 
 def test_install_manager_mock_pip():
@@ -232,3 +235,125 @@ def test_analyze_stdlib_usage_tmpdir(tmp_path):
     assert result["math"]["sqrt"] >= 1
 
     assert "numpy" not in result
+
+
+def test_llm_strip_think_and_extract_json():
+    assert ManagerLlm.strip_think("<think>hidden</think>visible") == "visible"
+    assert ManagerLlm.extract_json('```json\n{"a": 1}\n```') == {"a": 1}
+    assert ManagerLlm.extract_json('Sure! {"a": [1, 2]} hope it helps') == {"a": [1, 2]}
+    assert ManagerLlm.extract_json("<think>x</think>[1, 2, 3]") == [1, 2, 3]
+    with pytest.raises(EtoolError) as exc:
+        ManagerLlm.extract_json("no json here")
+    assert exc.value.code == ErrorCode.RUNTIME_ERROR
+
+
+def test_llm_resolve_config_missing(monkeypatch):
+    for name in (
+        "ETOOL_LLM_API_KEY",
+        "ETOOL_LLM_BASE_URL",
+        "ETOOL_LLM_MODEL",
+        "OPENAI_API_KEY",
+        "OPENAI_BASE_URL",
+        "OPENAI_MODEL",
+    ):
+        monkeypatch.delenv(name, raising=False)
+    with pytest.raises(EtoolError) as exc:
+        ManagerLlm.resolve_config()
+    assert exc.value.code == ErrorCode.VALIDATION_ERROR
+    assert set(exc.value.details["missing"]) == {"api_key", "base_url", "model"}
+
+
+def test_llm_chat_mocked():
+    reply = {"choices": [{"message": {"content": "<think>internal</think>pong"}}]}
+    response = MagicMock()
+    response.read.return_value = json.dumps(reply).encode("utf-8")
+    response.__enter__ = lambda self: self
+    response.__exit__ = lambda self, *a: False
+    with patch("urllib.request.urlopen", return_value=response) as urlopen:
+        text = ManagerLlm.chat(
+            "ping", api_key="k", base_url="https://api.example.com/v1", model="m"
+        )
+    assert text == "pong"
+    request = urlopen.call_args[0][0]
+    assert request.full_url == "https://api.example.com/v1/chat/completions"
+    assert json.loads(request.data)["model"] == "m"
+
+
+_RSS_XML = """<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0"><channel><title>Blog</title>
+<item><title>Post 1</title><link>https://example.com/p1</link>
+<pubDate>Mon, 01 Jan 2024 00:00:00 GMT</pubDate><description>first</description></item>
+</channel></rss>"""
+
+_ATOM_XML = """<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Blog</title>
+<entry><title>Entry 1</title><link rel="alternate" href="https://example.com/e1"/>
+<published>2024-01-01T00:00:00Z</published><summary>first</summary></entry>
+</feed>"""
+
+
+def test_web_html_to_text():
+    html = "<html><head><script>x()</script></head><body><p>Hello</p><p>World</p></body></html>"
+    assert ManagerWeb.html_to_text(html) == "Hello\nWorld"
+
+
+def test_web_rss_entries_from_xml():
+    rss = ManagerWeb.rss_entries(_RSS_XML)
+    assert rss == [
+        {
+            "title": "Post 1",
+            "link": "https://example.com/p1",
+            "published": "Mon, 01 Jan 2024 00:00:00 GMT",
+            "summary": "first",
+        }
+    ]
+    atom = ManagerWeb.rss_entries(_ATOM_XML)
+    assert atom[0]["title"] == "Entry 1"
+    assert atom[0]["link"] == "https://example.com/e1"
+
+
+def test_web_ip_helpers():
+    assert ManagerWeb.mask_ip("8.8.4.4") == "8.8.x.4"
+    assert ManagerWeb.mask_ip("2001:db8::1").startswith("2001:0db8:xxxx")
+    assert ManagerWeb.is_public_ip("8.8.8.8") is True
+    assert ManagerWeb.is_public_ip("192.168.1.1") is False
+    with pytest.raises(EtoolError) as exc:
+        ManagerWeb.mask_ip("not-an-ip")
+    assert exc.value.code == ErrorCode.VALIDATION_ERROR
+
+
+def test_cheatsheet_generate(tmp_path: Path):
+    data = {
+        "categories": [
+            {
+                "name": "Basics",
+                "commands": [
+                    {"command": "ls", "description": "list files"},
+                    {"command": "cd", "description": "change dir"},
+                ],
+            }
+        ]
+    }
+    out = ManagerCheatsheet.generate(
+        data, str(tmp_path / "cs.png"), title="Shell", subtitle="demo", width=640, height=360
+    )
+    assert Path(out).is_file()
+
+    with pytest.raises(EtoolError) as exc:
+        ManagerCheatsheet.generate({"categories": []}, str(tmp_path / "bad.png"))
+    assert exc.value.code == ErrorCode.VALIDATION_ERROR
+
+
+def test_cli_web_mask_ip_json():
+    exe = sys.executable
+    r = subprocess.run(
+        [exe, "-m", "etool", "--json", "web", "mask-ip", "8.8.4.4"],
+        cwd=project_root,
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    data = json.loads(r.stdout.strip())
+    assert data["ok"] is True
+    assert data["data"]["masked"] == "8.8.x.4"
+    assert data["data"]["is_public"] is True

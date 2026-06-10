@@ -14,7 +14,16 @@ class ManagerQrcode:
         :param path: Image file path
         :return: Decoded string, or None if decoding fails
         """
-        import cv2
+        try:
+            import cv2  # heavy optional dependency, imported lazily
+        except ImportError as e:
+            from .._core.errors import ErrorCode, EtoolError
+
+            raise EtoolError(
+                ErrorCode.DEPENDENCY_ERROR,
+                "QR decoding requires OpenCV",
+                {"install": 'pip install "etool[qr-decode]"'},
+            ) from e
 
         img = cv2.imread(path)
         if img is None:

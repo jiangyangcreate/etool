@@ -1,7 +1,5 @@
 import os
 from PIL import Image
-import skimage.io as io
-import numpy as np
 
 
 class ManagerImage:
@@ -15,26 +13,16 @@ class ManagerImage:
                 os.path.splitext(pics[0])[0] + "_LR" + os.path.splitext(pics[0])[1]
             )
         LR_save_path = save_path  # the name of the merged image
-        # horizontal merge
-        _image1 = io.imread(pics[0])  # np.ndarray, [h, w, c], 值域(0, 255), RGB
-
-        _image2 = io.imread(pics[1])  # np.ndarray, [h, w, c], 值域(0, 255), RGB
-
-        _image1_h = _image1.shape[0]  # check the size of the image
-        _image1_w = _image1.shape[1]
-        _image1_c = _image1.shape[2]
-        _image2_h = _image2.shape[0]  # check the size of the image
-        _image2_w = _image2.shape[1]
-        h = max(_image1_h, _image2_h)
-        w = _image1_w + _image2_w
-        pj1 = np.zeros((h, w, _image1_c))  # horizontal merge
-
-        pj1[:_image1_h, :_image1_w, :] = _image1.copy()  # img1 on the left
-        pj1[:_image2_h, _image1_w : _image1_w + _image2_w, :] = _image2.copy()  # img2 on the right
-        pj1 = np.array(
-            pj1, dtype=np.uint8
-        )  # change the data type of the pj1 array to "uint8"
-        io.imsave(LR_save_path, pj1)  # save the merged image
+        with Image.open(pics[0]) as im1, Image.open(pics[1]) as im2:
+            image1 = im1.convert("RGB")
+            image2 = im2.convert("RGB")
+            w = image1.width + image2.width
+            h = max(image1.height, image2.height)
+            # black canvas keeps parity with the historical numpy zeros() behavior
+            merged = Image.new("RGB", (w, h))
+            merged.paste(image1, (0, 0))  # img1 on the left
+            merged.paste(image2, (image1.width, 0))  # img2 on the right
+            merged.save(LR_save_path)
 
         return LR_save_path
 
@@ -47,25 +35,15 @@ class ManagerImage:
                 os.path.splitext(pics[0])[0] + "_UD" + os.path.splitext(pics[0])[1]
             )
         UD_save_path = save_path
-        # up and down merge
-        _image1 = io.imread(pics[0])  # np.ndarray, [h, w, c], (0, 255), RGB
-        _image2 = io.imread(pics[1])  # np.ndarray, [h, w, c], (0, 255), RGB
-
-        _image1_h = _image1.shape[0]  # check the size of the image
-        _image1_w = _image1.shape[1]
-        _image1_c = _image1.shape[2]
-        _image2_h = _image2.shape[0]  # check the size of the image
-        _image2_w = _image2.shape[1]
-        w = max(_image1_w, _image2_w)
-        h = _image1_h + _image2_h
-        pj = np.zeros((h, w, _image1_c))  # vertical merge
-
-        pj[:_image1_h, :_image1_w, :] = _image1.copy()  # img1 on top
-        pj[_image1_h : _image1_h + _image2_h, :_image2_w, :] = _image2.copy()  # img2 below
-        pj = np.array(
-            pj, dtype=np.uint8
-        )  # change the data type of the pj array to "uint8"
-        io.imsave(UD_save_path, pj)  # save the merged image
+        with Image.open(pics[0]) as im1, Image.open(pics[1]) as im2:
+            image1 = im1.convert("RGB")
+            image2 = im2.convert("RGB")
+            w = max(image1.width, image2.width)
+            h = image1.height + image2.height
+            merged = Image.new("RGB", (w, h))
+            merged.paste(image1, (0, 0))  # img1 on top
+            merged.paste(image2, (0, image1.height))  # img2 below
+            merged.save(UD_save_path)
 
         return UD_save_path
 

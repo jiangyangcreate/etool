@@ -1,4 +1,4 @@
-"""PDF utilities using pypdf and PyMuPDF only (no Windows COM)."""
+"""PDF utilities using pypdf (and PyMuPDF for rasterization only; no Windows COM)."""
 
 from __future__ import annotations
 
@@ -6,7 +6,6 @@ import os
 import sys
 from pathlib import Path
 
-import fitz  # PyMuPDF
 from pypdf import PdfReader, PdfWriter
 
 
@@ -278,7 +277,18 @@ class ManagerPdf:
         output_dir: str = "pdf_images",
         dpi: int = 2,
     ) -> None:
-        """Rasterize PDF pages to PNG using PyMuPDF."""
+        """Rasterize PDF pages to PNG using PyMuPDF (optional dependency: `etool[pdf-images]`)."""
+        try:
+            import fitz  # PyMuPDF; heavy optional dependency, imported lazily
+        except ImportError as e:
+            from .._core.errors import ErrorCode, EtoolError
+
+            raise EtoolError(
+                ErrorCode.DEPENDENCY_ERROR,
+                "PDF rasterization requires PyMuPDF",
+                {"install": 'pip install "etool[pdf-images]"'},
+            ) from e
+
         if sys.platform == "win32":
             os.environ.setdefault("PYTHONIOENCODING", "utf-8")
 

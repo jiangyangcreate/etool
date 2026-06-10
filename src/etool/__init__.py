@@ -27,6 +27,23 @@ except ImportError as e:
     _failed_imports.append(("ManagerSpeed", str(e)))
     warnings.warn(f"Failed to import ManagerSpeed: {e}", ImportWarning, stacklevel=2)
 
+try:
+    from ._network._web import ManagerWeb
+
+    __all__.append("ManagerWeb")
+except ImportError as e:
+    _failed_imports.append(("ManagerWeb", str(e)))
+    warnings.warn(f"Failed to import ManagerWeb: {e}", ImportWarning, stacklevel=2)
+
+# AI
+try:
+    from ._ai._llm import ManagerLlm
+
+    __all__.append("ManagerLlm")
+except ImportError as e:
+    _failed_imports.append(("ManagerLlm", str(e)))
+    warnings.warn(f"Failed to import ManagerLlm: {e}", ImportWarning, stacklevel=2)
+
 # Other
 try:
     from ._other._password import ManagerPassword
@@ -118,6 +135,14 @@ except ImportError as e:
     _failed_imports.append(("ManagerPdf", str(e)))
     warnings.warn(f"Failed to import ManagerPdf: {e}", ImportWarning, stacklevel=2)
 
+try:
+    from ._office._cheatsheet import ManagerCheatsheet
+
+    __all__.append("ManagerCheatsheet")
+except ImportError as e:
+    _failed_imports.append(("ManagerCheatsheet", str(e)))
+    warnings.warn(f"Failed to import ManagerCheatsheet: {e}", ImportWarning, stacklevel=2)
+
 # Markdown
 try:
     from ._md._md_to_docx import ManagerMd
@@ -141,4 +166,4 @@ def is_available(module_name: str) -> bool:
 
 
 def get_version() -> str:
-    return "2.1.0"
+    return "2.2.0"
